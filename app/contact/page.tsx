@@ -7,8 +7,8 @@ type ContactDetail = {
   href?: string | string[];
 };
 const APPS_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbwTzz1JGTtSDTRIytbXJV-WWz05KNufgB4AqJCPFbGwaiVdKaWg9Suu21Al4gQoOYA2pg/exec";
-const contactDetails:ContactDetail[] = [
+  "https://script.google.com/macros/s/AKfycbwlfjo4hCGthhniNRewa72kJplgncmnmzl6YNb83R9nqrLmvAXuoHdyC0RV3hhCOrQq/exec";
+const contactDetails: ContactDetail[] = [
   {
     label: "Merchant Legal Entity",
     value: "LLM AXIS PRIVATE LIMITED",
@@ -72,7 +72,10 @@ export default function ContactPage() {
     });
 
     try {
-      await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
+      await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`, {
+        method: "GET",
+        mode: "no-cors",
+      });
 
       setSubmitted(true);
       setForm({ name: "", email: "", phone: "", message: "" });
@@ -220,7 +223,8 @@ export default function ContactPage() {
                             >
                               {val}
                             </a>
-                            {idx !== (item.value as string[]).length - 1 && ", "}
+                            {idx !== (item.value as string[]).length - 1 &&
+                              ", "}
                           </span>
                         ))}
                       </p>

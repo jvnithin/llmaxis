@@ -42,7 +42,7 @@ const Navbar = () => {
         {/* Desktop CTA */}
         <div className="hidden md:block">
           <Link
-            href="/contact"
+            href="/learning"
             className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-2.5 rounded-full text-sm font-medium shadow"
           >
             Get Started

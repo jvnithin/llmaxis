@@ -1,10 +1,10 @@
 import Link from "next/link";
 
 const stats = [
-  { number: "1200+", label: "Companies" },
-  { number: "10000+", label: "Learners" },
+  { number: "500+", label: "Companies" },
+  { number: "6000+", label: "Learners" },
   // { number: "85%", label: "Jobs Secured" },
-  { number: "3 Weeks", label: "Avg Time to Offer" },
+  { number: "3 Months", label: "To Industry Ready" },
 ];
 
 const Hero = () => {

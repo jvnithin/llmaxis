@@ -1,9 +1,10 @@
 import { ArrowRight } from "lucide-react";
-
+import Link from "next/link";
 const programs = [
   {
     title: "Gen AI & Agentic AI Program",
     desc: "Master AI development with hands-on real-world projects.",
+    link: "/learning",
   },
   // {
   //   title: "Full Stack + AI",
@@ -17,12 +18,8 @@ const programs = [
 
 const Programs = () => {
   return (
-    <section
-      className="py-20 bg-white"
-      aria-labelledby="programs-heading"
-    >
+    <section className="py-20 bg-white" aria-labelledby="programs-heading">
       <div className="max-w-6xl mx-auto px-6">
-
         {/* Heading */}
         <div className="text-center mb-12">
           {/* ✅ Better SEO heading */}
@@ -35,13 +32,13 @@ const Programs = () => {
 
           {/* ✅ Keyword enriched description */}
           <p className="text-[#64748B] mt-3">
-            Industry-focused AI, machine learning, and full-stack development programs designed to make you job-ready.
+            Industry-focused AI, machine learning, and full-stack development
+            programs designed to make you job-ready.
           </p>
         </div>
 
         {/* Cards */}
         <div className="grid md:grid-cols-1 gap-6">
-
           {programs.map((item, index) => (
             <article
               key={index}
@@ -58,18 +55,17 @@ const Programs = () => {
               </h3>
 
               {/* Description */}
-              <p className="text-sm text-[#64748B] mt-2">
-                {item.desc}
-              </p>
+              <p className="text-sm text-[#64748B] mt-2">{item.desc}</p>
 
               {/* CTA */}
-              <div className="mt-4 flex items-center text-purple-600 font-medium text-sm">
-                Learn More
-                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition" />
-              </div>
+              <Link href={item.link}>
+                <div className="mt-4 flex items-center text-purple-600 font-medium text-sm">
+                  Learn More
+                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition" />
+                </div>
+              </Link>
             </article>
           ))}
-
         </div>
       </div>
     </section>
