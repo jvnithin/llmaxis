@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://llmaxis.in
+
+# Sitemaps
+Sitemap: https://llmaxis.in/sitemap.xml
