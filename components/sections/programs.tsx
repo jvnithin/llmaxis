@@ -2,17 +2,17 @@ import { ArrowRight } from "lucide-react";
 
 const programs = [
   {
-    title: "AI Engineering Bootcamp",
+    title: "Gen AI & Agentic AI Program",
     desc: "Master AI development with hands-on real-world projects.",
   },
-  {
-    title: "Full Stack + AI",
-    desc: "Build scalable apps integrated with AI capabilities.",
-  },
-  {
-    title: "Data Science & ML",
-    desc: "Learn data-driven decision making and machine learning.",
-  },
+  // {
+  //   title: "Full Stack + AI",
+  //   desc: "Build scalable apps integrated with AI capabilities.",
+  // },
+  // {
+  //   title: "Data Science & ML",
+  //   desc: "Learn data-driven decision making and machine learning.",
+  // },
 ];
 
 const Programs = () => {
@@ -30,7 +30,7 @@ const Programs = () => {
             id="programs-heading"
             className="text-3xl md:text-4xl font-bold text-[#0F172A]"
           >
-            AI & Machine Learning Programs
+            Gen AI & Agentic AI Program
           </h2>
 
           {/* ✅ Keyword enriched description */}
@@ -40,17 +40,17 @@ const Programs = () => {
         </div>
 
         {/* Cards */}
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-1 gap-6">
 
           {programs.map((item, index) => (
             <article
               key={index}
-              className="group border border-gray-200 rounded-2xl p-6 bg-white hover:shadow-xl transition-all duration-300"
+              className="group border border-gray-200 rounded-2xl p-6 bg-white hover:shadow-xl transition-all duration-300 "
             >
               {/* Icon */}
-              <div className="w-12 h-12 flex items-center justify-center rounded-lg bg-gradient-to-r from-purple-500 to-indigo-500 text-white mb-4">
+              {/* <div className="w-12 h-12 flex items-center justify-center rounded-lg bg-gradient-to-r from-purple-500 to-indigo-500 text-white mb-4">
                 {index + 1}
-              </div>
+              </div> */}
 
               {/* ✅ Program title as heading */}
               <h3 className="text-lg font-semibold text-[#0F172A]">
