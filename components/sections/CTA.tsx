@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-const WHATSAPP_NUMBER = "+919951521670"; // ← Replace with your number (country code + number, no + or spaces)
+const WHATSAPP_NUMBER = "+918309782214"; // ← Replace with your number (country code + number, no + or spaces)
 const WHATSAPP_MESSAGE = encodeURIComponent("Hii");
 const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_MESSAGE}`;
 

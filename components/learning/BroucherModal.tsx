@@ -201,7 +201,7 @@ export default function BrochureModal({ isOpen, onClose }: BrochureModalProps) {
             {/* Header */}
             <div className="mb-6">
               <h2 className="text-2xl font-bold text-gray-900">
-                Download Brochure
+                Download Curriculum
               </h2>
               <p className="text-gray-400 text-sm mt-1">
                 Fill in your details to get the brochure instantly.
@@ -296,7 +296,7 @@ export default function BrochureModal({ isOpen, onClose }: BrochureModalProps) {
                   disabled={loading}
                   className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 rounded-xl text-sm font-semibold hover:opacity-90 transition disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  {loading ? "Please wait..." : "Download Brochure"}
+                  {loading ? "Please wait..." : "Download Curriculum"}
                 </button>
               </div>
             </div>

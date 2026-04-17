@@ -52,7 +52,7 @@ export default function GenAIProgram() {
             onClick={() => setModalOpen(true)}
             className="border bg-white px-8 py-3 rounded-xl font-semibold hover:bg-gray-50 transition"
           >
-            Download Brochure
+            Download Curriculum
           </button>
         </div>
       </section>
