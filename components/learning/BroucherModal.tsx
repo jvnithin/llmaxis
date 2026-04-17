@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 const APPS_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbwTzz1JGTtSDTRIytbXJV-WWz05KNufgB4AqJCPFbGwaiVdKaWg9Suu21Al4gQoOYA2pg/exec";
+  "https://script.google.com/macros/s/AKfycbx07EJrG5Q-F-lj8SgyY-DIoNAPkiczXXyTf2VG_OQyhrVIqOoFuWE6q0ifvnb16z4L/exec";
 
 const countries = [
   { name: "Afghanistan", code: "AF", dial: "+93" },
@@ -129,20 +129,25 @@ export default function BrochureModal({ isOpen, onClose }: BrochureModalProps) {
     });
 
     try {
-      await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
-      setSubmitted(true);
+  await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`, {
+    method: "GET",
+    mode: "no-cors",
+  });
 
-      // Auto-download after submit
-      const link = document.createElement("a");
-      link.href = "/Brochure.pdf";
-      link.download = "LLMAxis_Brochure.pdf";
-      link.click();
-    } catch (err) {
-      console.error(err);
-      setError("Something went wrong. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+  setSubmitted(true);
+
+  // Auto-download after submit
+  const link = document.createElement("a");
+  link.href = "/Brochure.pdf";
+  link.download = "LLMAxis_Brochure.pdf";
+  link.click();
+
+} catch (err) {
+  console.error(err);
+  setError("Something went wrong. Please try again.");
+} finally {
+  setLoading(false);
+}
   };
 
   const handleClose = () => {
@@ -177,7 +182,7 @@ export default function BrochureModal({ isOpen, onClose }: BrochureModalProps) {
 
         {submitted ? (
           <div className="text-center py-6">
-            <div className="text-5xl mb-4">🎉</div>
+            
             <h3 className="text-xl font-bold text-gray-800 mb-2">
               Download Started!
             </h3>
@@ -195,9 +200,6 @@ export default function BrochureModal({ isOpen, onClose }: BrochureModalProps) {
           <>
             {/* Header */}
             <div className="mb-6">
-              <p className="inline-block px-3 py-1 text-xs bg-purple-100 text-purple-600 rounded-full font-medium mb-3">
-                Free Download
-              </p>
               <h2 className="text-2xl font-bold text-gray-900">
                 Download Brochure
               </h2>
