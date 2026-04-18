@@ -15,18 +15,26 @@ const caseStudies = [
 
 export default function CaseStudies() {
   return (
-    <section className="py-24 bg-[#F7F8FC]">
-      <div className="max-w-6xl mx-auto px-6 text-center">
+    <section className="py-16 md:py-24 bg-[#F7F8FC]">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
 
-        <h2 className="text-4xl font-bold text-[#0F172A]">
+        {/* Heading */}
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#0F172A] leading-tight">
           Real Results from Real Projects
         </h2>
 
-        <div className="grid md:grid-cols-3 gap-8 mt-16">
+        {/* Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 mt-10 md:mt-16">
           {caseStudies.map((item, i) => (
-            <div key={i} className="bg-white p-8 rounded-2xl shadow-sm">
-              <h3 className="font-semibold text-lg">{item.title}</h3>
-              <p className="text-purple-600 mt-2 font-medium">
+            <div
+              key={i}
+              className="bg-white p-6 md:p-8 rounded-2xl shadow-sm hover:shadow-md transition"
+            >
+              <h3 className="font-semibold text-base sm:text-lg md:text-lg text-[#0F172A]">
+                {item.title}
+              </h3>
+
+              <p className="text-purple-600 mt-2 font-medium text-sm sm:text-base">
                 {item.result}
               </p>
             </div>

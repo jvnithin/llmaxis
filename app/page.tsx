@@ -6,7 +6,6 @@ import CTA from "@/components/sections/CTA";
 import Programs from "@/components/sections/programs";
 import HowLearningWorks from "@/components/sections/HowLearningWorks";
 import Features from "@/components/sections/Features";
-import Process from "@/components/sections/Process";
 import CompanyLogos from "@/components/sections/CompanyLogos";
 
 export const metadata = {
@@ -33,7 +32,7 @@ export const metadata = {
     siteName: "LLM Axis",
     images: [
       {
-        url: "/public/logo.jpeg", // make sure this exists
+        url: "/public/logo.jpeg", 
         width: 1200,
         height: 630,
       },

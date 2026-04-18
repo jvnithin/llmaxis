@@ -54,26 +54,27 @@ export default function LeadForm() {
   };
 
   return (
-    <section className="py-24 bg-white">
-  <div className="max-w-4xl mx-auto px-6 text-center space-y-4">
-    
-    <h4 className="text-3xl md:text-4xl font-semibold">
-      Get Free Career Consultation
-    </h4>
+    <section className="py-16 md:py-24 bg-white">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center space-y-3 md:space-y-4">
+        <h4 className="text-xl sm:text-2xl md:text-4xl font-semibold text-[#0F172A]">
+          Get Free Career Consultation
+        </h4>
 
-    <h1 className="text-4xl md:text-6xl font-bold whitespace-nowrap">
-      Start taking action today!
-    </h1>
-
-  </div>
-</section>
+        <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-[#0F172A] leading-tight md:whitespace-nowrap">
+          Start taking action today!
+        </h1>
+      </div>
+    </section>
   );
 }
- {/* <p className="text-gray-500 mt-4">
+{
+  /* <p className="text-gray-500 mt-4">
           Talk to our experts and get a personalized roadmap.
-        </p> */}
+        </p> */
+}
 
-        {/* {submitted ? (
+{
+  /* {submitted ? (
           <div className="mt-10 p-6 bg-green-50 border border-green-200 rounded-xl text-green-700">
             <p className="text-xl font-semibold">🎉 Submitted successfully!</p>
             <p className="text-sm mt-2">We&apos;ll get back to you shortly.</p>
@@ -135,4 +136,5 @@ export default function LeadForm() {
               {loading ? "Submitting..." : "Submit Request"}
             </button>
           </div>
-        )} */}
+        )} */
+}
