@@ -9,9 +9,8 @@ const Navbar = () => {
   const [open, setOpen] = useState(false);
 
   return (
-    <nav className="fixed top-0 w-full z-50 bg-white border-b border-gray-100">
+    <nav className="fixed top-0 w-full z-[999] bg-white border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-3 flex items-center justify-between">
-
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
           <Image
@@ -45,8 +44,9 @@ const Navbar = () => {
 
         {/* Mobile Menu Button */}
         <button
+          type="button"
           className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition"
-          onClick={() => setOpen(!open)}
+          onClick={() => setOpen((prev) => !prev)}
         >
           {open ? <X size={24} /> : <Menu size={24} />}
         </button>
@@ -54,9 +54,8 @@ const Navbar = () => {
 
       {/* Mobile Dropdown */}
       {open && (
-        <div className="md:hidden bg-white border-t border-gray-100 shadow-lg">
+        <div className="md:hidden bg-white border-t border-gray-100 shadow-lg absolute top-full left-0 w-full z-[999]">
           <div className="px-5 py-6 space-y-5">
-
             <Link
               href="/"
               onClick={() => setOpen(false)}
@@ -91,7 +90,6 @@ const Navbar = () => {
 
             {/* Divider */}
             <div className="border-t pt-4">
-
               <Link
                 href="/learning"
                 onClick={() => setOpen(false)}
@@ -99,7 +97,6 @@ const Navbar = () => {
               >
                 Get Started
               </Link>
-
             </div>
           </div>
         </div>
