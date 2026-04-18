@@ -8,7 +8,7 @@ const testimonials = [
     text: "Aura doesn't simplify things; they clarify them. The depth of the curriculum regarding Neural Networks is unmatched by any other bootcamp.",
   },
   {
-    name: "Annie",
+    name: "Nandhini",
     role: "AI Engineer @ Stripe",
     initials: "DC",
     text: "The practical focus on LLMs was exactly what I needed. I transitioned from a traditional backend role to an AI Engineer position within 2 months of graduating.",
