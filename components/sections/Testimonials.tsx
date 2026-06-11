@@ -3,19 +3,19 @@ import { Star } from "lucide-react";
 const testimonials = [
   {
     name: "Suman",
-    role: "Data Scientist @ Uber",
+    role: "Data Scientist",
     initials: "SM",
     text: "Aura doesn't simplify things; they clarify them. The depth of the curriculum regarding Neural Networks is unmatched by any other bootcamp.",
   },
   {
     name: "Nandhini",
-    role: "AI Engineer @ Stripe",
+    role: "AI Engineer",
     initials: "DC",
     text: "The practical focus on LLMs was exactly what I needed. I transitioned from a traditional backend role to an AI Engineer position within 2 months of graduating.",
   },
   {
     name: "Mohan",
-    role: "Product Manager @ Microsoft",
+    role: "Product Manager",
     initials: "JW",
     text: "Best investment for my career. The mentors alone are worth the price. Highly recommended.",
   },
