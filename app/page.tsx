@@ -9,7 +9,7 @@ import Features from "@/components/sections/Features";
 import CompanyLogos from "@/components/sections/CompanyLogos";
 
 export const metadata = {
-  title: "AI Bootcamp in India | Learn AI with Real Projects | LLM Axis",
+  title: "AI Bootcamp | Learn AI with Real Projects | LLM Axis",
   description:
     "Join LLM Axis AI Bootcamp to learn machine learning, automation, and full-stack AI development through real-world projects, expert mentorship, and job-ready training.",
 
