@@ -129,32 +129,37 @@ export default function BrochureModal({ isOpen, onClose }: BrochureModalProps) {
     });
 
     try {
-  await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`, {
-    method: "GET",
-    mode: "no-cors",
-  });
+      await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`, {
+        method: "GET",
+        mode: "no-cors",
+      });
 
-  setSubmitted(true);
+      setSubmitted(true);
 
-  // Auto-download after submit
-  const link = document.createElement("a");
-  link.href = "/Brochure.pdf";
-  link.download = "LLMAxis_Brochure.pdf";
-  link.click();
-
-} catch (err) {
-  console.error(err);
-  setError("Something went wrong. Please try again.");
-} finally {
-  setLoading(false);
-}
+      // Auto-download after submit
+      const link = document.createElement("a");
+      link.href = "/Brochure1.pdf";
+      link.download = "LLMAxis_Brochure.pdf";
+      link.click();
+    } catch (err) {
+      console.error(err);
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleClose = () => {
     onClose();
     setTimeout(() => {
       setSubmitted(false);
-      setForm({ name: "", email: "", country: "India", dialCode: "+91", phone: "" });
+      setForm({
+        name: "",
+        email: "",
+        country: "India",
+        dialCode: "+91",
+        phone: "",
+      });
       setError("");
     }, 300);
   };
@@ -182,7 +187,6 @@ export default function BrochureModal({ isOpen, onClose }: BrochureModalProps) {
 
         {submitted ? (
           <div className="text-center py-6">
-            
             <h3 className="text-xl font-bold text-gray-800 mb-2">
               Download Started!
             </h3>
@@ -210,7 +214,6 @@ export default function BrochureModal({ isOpen, onClose }: BrochureModalProps) {
 
             {/* Form */}
             <div className="space-y-4">
-
               {/* Name */}
               <div>
                 <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">
@@ -296,7 +299,7 @@ export default function BrochureModal({ isOpen, onClose }: BrochureModalProps) {
                   disabled={loading}
                   className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 rounded-xl text-sm font-semibold hover:opacity-90 transition disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  {loading ? "Please wait..." : "Download Curriculum"}
+                  {loading ? "Please wait..." : "Curriculum"}
                 </button>
               </div>
             </div>
