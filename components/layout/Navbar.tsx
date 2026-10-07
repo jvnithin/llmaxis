@@ -29,6 +29,7 @@ const Navbar = () => {
         <div className="hidden md:flex items-center gap-10 text-sm font-medium text-[#334155]">
           <Link href="/learning">LLM Axis Learning</Link>
           <Link href="/hire">Hire Talent</Link>
+          <Link href="/events">Events</Link>
           <Link href="/contact">Contact US</Link>
         </div>
 
@@ -78,6 +79,14 @@ const Navbar = () => {
               className="block text-base font-medium text-gray-700"
             >
               Hire Talent
+            </Link>
+
+            <Link
+              href="/events"
+              onClick={() => setOpen(false)}
+              className="block text-base font-medium text-gray-700"
+            >
+              Events
             </Link>
 
             <Link
