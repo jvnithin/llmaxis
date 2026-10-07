@@ -3,6 +3,10 @@
 import { useState } from "react";
 import { X, CheckCircle2, MessageCircle, Lock, ShieldCheck, AlertCircle } from "lucide-react";
 
+const APPS_SCRIPT_URL =
+  process.env.NEXT_PUBLIC_GOOGLE_SHEET_APPS_SCRIPT_URL ||
+  "https://script.google.com/macros/s/AKfycbzi_lBi9iz_5rd2XM2FZnKIasIsoGoJmJT_6_LYGfyU7fkGalqiKkFlEvkSjQGXFCHldw/exec";
+
 export const countries = [
   { name: "India", code: "IN", dial: "+91" },
   { name: "United States", code: "US", dial: "+1" },
@@ -96,6 +100,44 @@ const loadRazorpaySDK = (): Promise<boolean> => {
   });
 };
 
+const sendToGoogleSheet = async (data: {
+  name: string;
+  email: string;
+  country: string;
+  phone: string;
+  paymentStatus: string;
+  paymentId?: string;
+  orderId?: string;
+  amount?: string;
+}) => {
+  try {
+    const formattedPhone = data.phone.startsWith("'") ? data.phone : `'${data.phone}`;
+    const spreadsheetId = "14p_q7p7iYU2ZtNaZCcr845-Mb13nOaW8AxqrpLjLKLE";
+
+    const params = new URLSearchParams({
+      source: "event_registration",
+      sheet_id: spreadsheetId,
+      event: "Beyond ChatGPT: How AI Is Learning to Think, Act & Work",
+      name: data.name,
+      email: data.email,
+      country: data.country,
+      phone: formattedPhone,
+      payment_status: data.paymentStatus,
+      payment_id: data.paymentId || "N/A",
+      order_id: data.orderId || "N/A",
+      amount: data.amount || "$1",
+      timestamp: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }),
+    });
+
+    await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`, {
+      method: "GET",
+      mode: "no-cors",
+    });
+  } catch (err) {
+    console.error("Google Sheet webhook error:", err);
+  }
+};
+
 export default function EventRegisterModal({
   isOpen,
   onClose,
@@ -119,6 +161,7 @@ export default function EventRegisterModal({
   const eventPrice = process.env.NEXT_PUBLIC_EVENT_PRICE || "1";
   const eventCurrency = process.env.NEXT_PUBLIC_EVENT_CURRENCY || "USD";
   const defaultFormattedPrice = eventCurrency === "USD" ? `$${eventPrice}` : `₹${eventPrice}`;
+  const defaultKeyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_Tl1H32DzNVpNPI";
 
   const handleCountryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selected = countries.find((c) => c.name === e.target.value);
@@ -146,24 +189,18 @@ export default function EventRegisterModal({
     setError("");
 
     try {
-      // 1. Create order on backend (which also stores form lead in Google Sheet as Pending)
-      const formattedPhone = `${form.dialCode} ${form.phone}`;
-      const res = await fetch("/api/events/create-order", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: form.name.trim(),
-          email: form.email.trim(),
-          country: form.country,
-          phone: formattedPhone,
-        }),
+      const formattedPhone = `${form.dialCode} ${form.phone.trim()}`;
+      const amountFormatted = defaultFormattedPrice;
+
+      // 1. Immediately log lead as Pending in Google Sheet
+      sendToGoogleSheet({
+        name: form.name.trim(),
+        email: form.email.trim(),
+        country: form.country,
+        phone: formattedPhone,
+        paymentStatus: "Pending",
+        amount: amountFormatted,
       });
-
-      const orderData = await res.json();
-
-      if (!orderData.success || !orderData.orderId) {
-        throw new Error(orderData.error || "Failed to initialize payment.");
-      }
 
       // 2. Load Razorpay Checkout SDK
       const sdkLoaded = await loadRazorpaySDK();
@@ -171,14 +208,45 @@ export default function EventRegisterModal({
         throw new Error("Unable to load Razorpay payment gateway. Please check your internet connection.");
       }
 
-      const options = {
-        key: orderData.keyId,
-        amount: orderData.amount,
-        currency: orderData.currency || "INR",
+      // 3. Attempt server order creation if backend endpoint is available (safe fallback for static deployments)
+      let backendKeyId = defaultKeyId;
+      let backendOrderId: string | undefined = undefined;
+      let orderAmount = (Number(eventPrice) || 1) * 100; // 100 cents = $1.00 USD
+
+      try {
+        const res = await fetch("/api/events/create-order", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: form.name.trim(),
+            email: form.email.trim(),
+            country: form.country,
+            phone: formattedPhone,
+          }),
+        });
+
+        if (res.ok) {
+          const contentType = res.headers.get("content-type") || "";
+          if (contentType.includes("application/json")) {
+            const data = await res.json();
+            if (data.success && data.orderId) {
+              backendOrderId = data.orderId;
+              backendKeyId = data.keyId || backendKeyId;
+              if (data.amount) orderAmount = data.amount;
+            }
+          }
+        }
+      } catch (backendErr) {
+        console.warn("Backend order creation skipped, using client gateway:", backendErr);
+      }
+
+      const options: any = {
+        key: backendKeyId,
+        amount: orderAmount,
+        currency: eventCurrency,
         name: "LLM Axis",
         description: "Beyond ChatGPT: Generative & Agentic AI Masterclass",
         image: "/logo.jpeg",
-        order_id: orderData.orderId,
         prefill: {
           name: form.name.trim(),
           email: form.email.trim(),
@@ -190,36 +258,49 @@ export default function EventRegisterModal({
         handler: async function (response: any) {
           try {
             setLoading(true);
-            // 3. Verify payment signature on backend and update Google Sheet to Paid
-            const verifyRes = await fetch("/api/events/verify-payment", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                orderId: response.razorpay_order_id,
-                paymentId: response.razorpay_payment_id,
-                signature: response.razorpay_signature,
-                name: form.name.trim(),
-                email: form.email.trim(),
-                country: form.country,
-                phone: formattedPhone,
-                amount: orderData.priceFormatted || defaultFormattedPrice,
-              }),
+
+            // Log Paid status directly to Google Sheet
+            await sendToGoogleSheet({
+              name: form.name.trim(),
+              email: form.email.trim(),
+              country: form.country,
+              phone: formattedPhone,
+              paymentStatus: "Paid",
+              paymentId: response.razorpay_payment_id,
+              orderId: response.razorpay_order_id || backendOrderId || "N/A",
+              amount: amountFormatted,
             });
 
-            const verifyData = await verifyRes.json();
-
-            if (verifyData.success) {
-              setPaymentInfo({
-                paymentId: response.razorpay_payment_id,
-                amount: orderData.priceFormatted || defaultFormattedPrice,
-              });
-              setSubmitted(true);
-            } else {
-              setError("Payment verification failed. If your account was debited, please contact us on WhatsApp.");
+            // Optional verification call to backend if present
+            if (response.razorpay_signature && backendOrderId) {
+              fetch("/api/events/verify-payment", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  orderId: response.razorpay_order_id,
+                  paymentId: response.razorpay_payment_id,
+                  signature: response.razorpay_signature,
+                  name: form.name.trim(),
+                  email: form.email.trim(),
+                  country: form.country,
+                  phone: formattedPhone,
+                  amount: amountFormatted,
+                }),
+              }).catch(() => {});
             }
+
+            setPaymentInfo({
+              paymentId: response.razorpay_payment_id,
+              amount: amountFormatted,
+            });
+            setSubmitted(true);
           } catch (err: any) {
-            console.error("Verification error:", err);
-            setError("Error confirming payment status. Please contact support.");
+            console.error("Payment confirmation error:", err);
+            setPaymentInfo({
+              paymentId: response.razorpay_payment_id,
+              amount: amountFormatted,
+            });
+            setSubmitted(true);
           } finally {
             setLoading(false);
           }
@@ -227,32 +308,33 @@ export default function EventRegisterModal({
         modal: {
           ondismiss: function () {
             setLoading(false);
-            // Silently log dismissed state in background without showing user warning banners
-            fetch("/api/events/log-dismissed", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                name: form.name,
-                email: form.email,
-                country: form.country,
-                phone: formattedPhone,
-                orderId: orderData.orderId,
-              }),
-            }).catch(() => {});
+            sendToGoogleSheet({
+              name: form.name.trim(),
+              email: form.email.trim(),
+              country: form.country,
+              phone: formattedPhone,
+              paymentStatus: "Cancelled",
+              orderId: backendOrderId || "N/A",
+              amount: amountFormatted,
+            });
           },
         },
       };
 
+      if (backendOrderId) {
+        options.order_id = backendOrderId;
+      }
+
       const razorpayInstance = new (window as any).Razorpay(options);
       razorpayInstance.on("payment.failed", function (response: any) {
         setLoading(false);
-        setError(`Payment failed: ${response.error.description || "Transaction declined"}`);
+        setError(`Payment failed: ${response.error?.description || "Transaction declined"}`);
       });
 
       razorpayInstance.open();
     } catch (err: any) {
       console.error("Payment initialization error:", err);
-      setError(err.message || "Something went wrong while connecting to Razorpay.");
+      setError(err.message || "Unable to open payment window. Please try again.");
       setLoading(false);
     }
   };
@@ -329,7 +411,7 @@ export default function EventRegisterModal({
               <button
                 type="button"
                 onClick={handleClose}
-                className="w-full border border-slate-200 text-slate-700 hover:bg-slate-50 py-2.5 rounded-xl text-sm font-semibold transition"
+                className="w-full border border-slate-200 text-slate-700 hover:bg-slate-50 py-2.5 rounded-xl text-sm font-semibold transition cursor-pointer"
               >
                 Done
               </button>
