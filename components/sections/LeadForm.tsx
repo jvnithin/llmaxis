@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { event as trackFbEvent } from "@/lib/fpixel";
 
 const APPS_SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbw0UjyDVuh39VtJsBdwRh1vTC6G2q10r5OmbeOVZ11_6tfBx5Ssw2wwr31wZ_3mmaL0KA/exec";
@@ -44,6 +45,10 @@ export default function LeadForm() {
       await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
 
       setSubmitted(true);
+      trackFbEvent("Lead", {
+        content_name: "Career Consultation",
+        source: "home_lead_form",
+      });
       setForm({ name: "", email: "", phone: "", message: "" });
     } catch (err) {
       console.error(err);

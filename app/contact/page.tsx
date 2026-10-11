@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { event as trackFbEvent } from "@/lib/fpixel";
 type ContactDetail = {
   label: string;
   value: string | string[];
@@ -78,6 +79,9 @@ export default function ContactPage() {
       });
 
       setSubmitted(true);
+      trackFbEvent("Contact", {
+        content_name: "Contact Us Form",
+      });
       setForm({ name: "", email: "", phone: "", message: "" });
     } catch (err) {
       console.error(err);

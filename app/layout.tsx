@@ -1,6 +1,6 @@
 import "./globals.css";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+import AppLayout from "@/components/layout/AppLayout";
+import MetaPixel from "@/components/analytics/MetaPixel";
 import { Plus_Jakarta_Sans } from "next/font/google";
 
 const font = Plus_Jakarta_Sans({
@@ -27,10 +27,10 @@ export const metadata = {
     "full stack AI",
     "AI projects",
     "AI training with placement",
-    "AI development company India"
+    "AI development company India",
   ],
 
-  // ✅ Canonical (VERY IMPORTANT)
+  // ✅ Canonical
   alternates: {
     canonical: "https://llmaxis.in",
   },
@@ -43,7 +43,7 @@ export const metadata = {
     siteName: "LLM Axis",
     images: [
       {
-        url: "/public/logo.jpeg",
+        url: "/logo.jpeg",
         width: 1200,
         height: 630,
       },
@@ -55,8 +55,7 @@ export const metadata = {
   twitter: {
     card: "summary_large_image",
     title: "LLM Axis - AI Bootcamp",
-    description:
-      "Build real-world AI projects and become job-ready.",
+    description: "Build real-world AI projects and become job-ready.",
     images: ["/og-image.png"],
   },
 
@@ -73,14 +72,16 @@ export const metadata = {
     },
   },
 
-  // ✅ Icons (IMPORTANT for branding + SEO trust)
+  // ✅ Icons - Uses public/favicon.ico
   icons: {
-    icon: "/favicon.ico",
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon.ico" },
+    ],
     shortcut: "/favicon.ico",
-    apple: "/apple-icon.png",
+    apple: "/favicon.ico",
   },
 
-  // ✅ Basic verification placeholder (add later)
   verification: {
     google: "2fLL8yF7-HtGGRh...",
   },
@@ -93,10 +94,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={font.className}>
+      <head>
+        <link rel="icon" href="/favicon.ico" type="image/x-icon" sizes="any" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="/favicon.ico" />
+      </head>
       <body className={`${font.className} antialiased text-[#0F172A] bg-white`}>
-        <Navbar />
-        <main className="pt-20">{children}</main>
-        <Footer />
+        <MetaPixel />
+        <AppLayout>{children}</AppLayout>
       </body>
     </html>
   );

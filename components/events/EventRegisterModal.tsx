@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X, CheckCircle2, MessageCircle, Lock, ShieldCheck, AlertCircle } from "lucide-react";
+import { event as trackFbEvent } from "@/lib/fpixel";
 
 const APPS_SCRIPT_URL =
   process.env.NEXT_PUBLIC_GOOGLE_SHEET_APPS_SCRIPT_URL ||
-  "https://script.google.com/macros/s/AKfycbzi_lBi9iz_5rd2XM2FZnKIasIsoGoJmJT_6_LYGfyU7fkGalqiKkFlEvkSjQGXFCHldw/exec";
+  process.env.GOOGLE_SHEET_APPS_SCRIPT_URL ||
+  "https://script.google.com/macros/s/AKfycbwN30PSI9aAWqjOahuzx7R1ID6qCMyDbRadRi_e3nLvm2TV_Gw7b6Br6glrXtKzcEoq/exec";
 
 export const countries = [
   { name: "India", code: "IN", dial: "+91" },
@@ -161,7 +163,22 @@ export default function EventRegisterModal({
   const eventPrice = process.env.NEXT_PUBLIC_EVENT_PRICE || "1";
   const eventCurrency = process.env.NEXT_PUBLIC_EVENT_CURRENCY || "USD";
   const defaultFormattedPrice = eventCurrency === "USD" ? `$${eventPrice}` : `₹${eventPrice}`;
-  const defaultKeyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_Tl1H32DzNVpNPI";
+  const defaultKeyId =
+    process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ||
+    process.env.RAZORPAY_KEY_ID ||
+    "rzp_live_Tl1rwsxDyqo61i";
+
+  // Track ViewContent event when registration modal opens
+  useEffect(() => {
+    if (isOpen) {
+      trackFbEvent("ViewContent", {
+        content_name: "Beyond ChatGPT: How AI Is Learning to Think, Act & Work",
+        content_category: "Event Registration",
+        currency: eventCurrency,
+        value: Number(eventPrice) || 1,
+      });
+    }
+  }, [isOpen, eventCurrency, eventPrice]);
 
   const handleCountryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selected = countries.find((c) => c.name === e.target.value);
@@ -191,6 +208,21 @@ export default function EventRegisterModal({
     try {
       const formattedPhone = `${form.dialCode} ${form.phone.trim()}`;
       const amountFormatted = defaultFormattedPrice;
+
+      // Track Lead and InitiateCheckout in Meta Pixel
+      trackFbEvent("Lead", {
+        content_name: "Beyond ChatGPT: How AI Is Learning to Think, Act & Work",
+        content_category: "Event Registration",
+        currency: eventCurrency,
+        value: Number(eventPrice) || 1,
+      });
+
+      trackFbEvent("InitiateCheckout", {
+        content_name: "Beyond ChatGPT: How AI Is Learning to Think, Act & Work",
+        currency: eventCurrency,
+        value: Number(eventPrice) || 1,
+        num_items: 1,
+      });
 
       // 1. Immediately log lead as Pending in Google Sheet
       sendToGoogleSheet({
@@ -269,6 +301,14 @@ export default function EventRegisterModal({
               paymentId: response.razorpay_payment_id,
               orderId: response.razorpay_order_id || backendOrderId || "N/A",
               amount: amountFormatted,
+            });
+
+            // Track Purchase in Meta Pixel
+            trackFbEvent("Purchase", {
+              content_name: "Beyond ChatGPT: Generative & Agentic AI Masterclass",
+              currency: eventCurrency,
+              value: Number(eventPrice) || 1,
+              transaction_id: response.razorpay_payment_id,
             });
 
             // Optional verification call to backend if present

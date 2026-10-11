@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import {
   Brain,
   BookOpen,
@@ -78,7 +79,7 @@ export default function EventsPage() {
   const [modalOpen, setModalOpen] = useState(false);
 
   return (
-    <main className="bg-[#F8FAFC] min-h-screen py-6 sm:py-10 px-3 sm:px-6 lg:px-8">
+    <main className="bg-[#F8FAFC] min-h-screen pt-24 sm:pt-28 pb-10 sm:pb-16 px-3 sm:px-6 lg:px-8">
       {/* Registration Modal */}
       <EventRegisterModal
         isOpen={modalOpen}
@@ -89,10 +90,16 @@ export default function EventsPage() {
         {/* Top Header with Register Button on Top Right */}
         <div className="flex items-center justify-between gap-4 mb-6 md:mb-8 pb-4 border-b border-slate-200/80">
           <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-purple-600">
-              Live Masterclass
-            </span>
-            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+            <div className="flex items-center gap-1.5 text-xs text-slate-500 mb-1">
+              <Link href="/" className="hover:text-purple-600 transition">
+                Home
+              </Link>
+              <span className="text-slate-400">/</span>
+              <span className="font-semibold uppercase tracking-wider text-purple-600">
+                Live Masterclass
+              </span>
+            </div>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">
               Event Details
             </h1>
           </div>
@@ -250,7 +257,7 @@ export default function EventsPage() {
                 Discover what YOU can build with it.
               </h3>
               <p className="text-xs text-purple-200 pt-1 underline underline-offset-4">
-                Click here to Register for Free →
+                Click here to Register Now →
               </p>
             </section>
 

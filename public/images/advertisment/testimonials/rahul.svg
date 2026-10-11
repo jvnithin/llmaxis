@@ -1,0 +1,19 @@
+<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="rahulBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3B82F6"/>
+      <stop offset="100%" stop-color="#1D4ED8"/>
+    </linearGradient>
+  </defs>
+  <rect width="100" height="100" rx="50" fill="url(#rahulBg)"/>
+  <!-- Stylized avatar face & hair -->
+  <circle cx="50" cy="42" r="20" fill="#FCD34D"/>
+  <path d="M30 38 C30 25 70 25 70 38 C70 30 60 22 50 22 C40 22 30 30 30 38 Z" fill="#1E293B"/>
+  <!-- Smile & Eyes -->
+  <circle cx="43" cy="40" r="2.5" fill="#1E293B"/>
+  <circle cx="57" cy="40" r="2.5" fill="#1E293B"/>
+  <path d="M45 47 Q50 51 55 47" stroke="#1E293B" stroke-width="2" stroke-linecap="round" fill="none"/>
+  <!-- Beard & Shoulders -->
+  <path d="M43 49 Q50 55 57 49" stroke="#334155" stroke-width="2" stroke-linecap="round" fill="none"/>
+  <path d="M22 86 C22 66 78 66 78 86 Z" fill="#0F172A"/>
+</svg>

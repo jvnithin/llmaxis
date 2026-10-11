@@ -32,7 +32,7 @@ export const metadata = {
     siteName: "LLM Axis",
     images: [
       {
-        url: "/public/logo.jpeg", 
+        url: "/logo.jpeg", 
         width: 1200,
         height: 630,
       },

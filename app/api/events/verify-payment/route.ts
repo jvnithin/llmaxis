@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { saveEventLeadToGoogleSheet } from "@/lib/googleSheets";
+import { sendMetaServerEvent } from "@/lib/metaConversions";
 
 export async function POST(req: Request) {
   try {
@@ -68,6 +69,17 @@ export async function POST(req: Request) {
       orderId,
       amount: amount || `₹${process.env.EVENT_PRICE_INR || 499}`,
     });
+
+    // Optionally dispatch server-side Purchase event via Meta Conversions API
+    sendMetaServerEvent({
+      eventName: "Purchase",
+      email,
+      phone,
+      name,
+      orderId,
+      value: Number(process.env.EVENT_PRICE) || 1,
+      currency: process.env.EVENT_CURRENCY || "USD",
+    }).catch(() => {});
 
     return Response.json({
       success: true,

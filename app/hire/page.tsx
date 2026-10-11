@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { event as trackFbEvent } from "@/lib/fpixel";
 
 const APPS_SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbzi_lBi9iz_5rd2XM2FZnKIasIsoGoJmJT_6_LYGfyU7fkGalqiKkFlEvkSjQGXFCHldw/exec";
@@ -45,6 +46,10 @@ export default function HirePage() {
     if (!res.ok) throw new Error("Request failed");
 
     setSubmitted(true);
+    trackFbEvent("Lead", {
+      content_name: form.interest || "Hire Talent",
+      source: "hire_talent_form",
+    });
     setForm({ company: "", email: "", interest: "AI Engineer" });
 
   } catch (err) {

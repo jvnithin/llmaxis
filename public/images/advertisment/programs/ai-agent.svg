@@ -1,0 +1,44 @@
+<svg width="240" height="180" viewBox="0 0 240 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="amberGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#F59E0B" stop-opacity="0.6"/>
+      <stop offset="60%" stop-color="#D97706" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#B45309" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="robotBody" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F3F4F6"/>
+      <stop offset="100%" stop-color="#E5E7EB"/>
+    </linearGradient>
+    <linearGradient id="visorScreen" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E293B"/>
+      <stop offset="100%" stop-color="#0F172A"/>
+    </linearGradient>
+    <linearGradient id="cyanEyes" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8"/>
+      <stop offset="100%" stop-color="#0284C7"/>
+    </linearGradient>
+  </defs>
+  <circle cx="120" cy="90" r="65" fill="url(#amberGlow)"/>
+  <g transform="translate(120, 90)">
+    <!-- Antenna -->
+    <line x1="0" y1="-32" x2="0" y2="-44" stroke="#9CA3AF" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="0" cy="-46" r="4.5" fill="#F59E0B"/>
+    <!-- Robot Head Outer Frame -->
+    <rect x="-36" y="-32" width="72" height="58" rx="18" fill="url(#robotBody)" stroke="#D1D5DB" stroke-width="2"/>
+    <!-- Robot Face Screen -->
+    <rect x="-28" y="-24" width="56" height="42" rx="12" fill="url(#visorScreen)"/>
+    <!-- Glowing Cute Cyan Eyes -->
+    <ellipse cx="-13" cy="-3" rx="7" ry="9" fill="url(#cyanEyes)"/>
+    <ellipse cx="13" cy="-3" rx="7" ry="9" fill="url(#cyanEyes)"/>
+    <circle cx="-11" cy="-5" r="2.5" fill="#FFFFFF"/>
+    <circle cx="15" cy="-5" r="2.5" fill="#FFFFFF"/>
+    <!-- Cute Smile -->
+    <path d="M-6 8 Q0 12 6 8" stroke="#38BDF8" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <!-- Ears / Headset Nodes -->
+    <rect x="-42" y="-14" width="6" height="18" rx="3" fill="#9CA3AF"/>
+    <rect x="36" y="-14" width="6" height="18" rx="3" fill="#9CA3AF"/>
+    <!-- Floating Automation Gear / Sparks -->
+    <circle cx="38" cy="-28" r="3.5" fill="#FBBF24"/>
+    <circle cx="-38" cy="24" r="3" fill="#F59E0B"/>
+  </g>
+</svg>

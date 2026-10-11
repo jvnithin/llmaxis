@@ -1,6 +1,7 @@
 const DEFAULT_APPS_SCRIPT_URL =
   process.env.GOOGLE_SHEET_APPS_SCRIPT_URL ||
-  "https://script.google.com/macros/s/AKfycbzi_lBi9iz_5rd2XM2FZnKIasIsoGoJmJT_6_LYGfyU7fkGalqiKkFlEvkSjQGXFCHldw/exec";
+  process.env.NEXT_PUBLIC_GOOGLE_SHEET_APPS_SCRIPT_URL ||
+  "https://script.google.com/macros/s/AKfycbwN30PSI9aAWqjOahuzx7R1ID6qCMyDbRadRi_e3nLvm2TV_Gw7b6Br6glrXtKzcEoq/exec";
 
 export interface EventLeadData {
   name: string;

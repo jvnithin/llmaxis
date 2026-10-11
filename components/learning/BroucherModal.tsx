@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { event as trackFbEvent } from "@/lib/fpixel";
 
 const APPS_SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbx07EJrG5Q-F-lj8SgyY-DIoNAPkiczXXyTf2VG_OQyhrVIqOoFuWE6q0ifvnb16z4L/exec";
@@ -135,6 +136,10 @@ export default function BrochureModal({ isOpen, onClose }: BrochureModalProps) {
       });
 
       setSubmitted(true);
+      trackFbEvent("Lead", {
+        content_name: "Gen AI Brochure Download",
+        source: "brochure_modal",
+      });
 
       // Auto-download after submit
       const link = document.createElement("a");
