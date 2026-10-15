@@ -1,6 +1,7 @@
 import "./globals.css";
 import AppLayout from "@/components/layout/AppLayout";
 import MetaPixel from "@/components/analytics/MetaPixel";
+import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
 import { Plus_Jakarta_Sans } from "next/font/google";
 
 const font = Plus_Jakarta_Sans({
@@ -100,6 +101,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/favicon.ico" />
       </head>
       <body className={`${font.className} antialiased text-[#0F172A] bg-white`}>
+        <GoogleAnalytics />
         <MetaPixel />
         <AppLayout>{children}</AppLayout>
       </body>
