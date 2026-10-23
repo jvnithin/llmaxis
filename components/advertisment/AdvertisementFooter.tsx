@@ -136,7 +136,6 @@ export default function AdvertisementFooter() {
                 <li><Link href="/learning" className="hover:text-purple-600 transition">Blogs</Link></li>
                 <li><Link href="/learning" className="hover:text-purple-600 transition">Career Guides</Link></li>
                 <li><Link href="/learning" className="hover:text-purple-600 transition">FAQs</Link></li>
-                <li><Link href="/contact" className="hover:text-purple-600 transition">Events</Link></li>
                 <li><Link href="/contact" className="hover:text-purple-600 transition">Community</Link></li>
               </ul>
             </div>

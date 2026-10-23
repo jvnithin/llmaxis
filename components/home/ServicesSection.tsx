@@ -1,0 +1,122 @@
+import React from "react";
+import Icon, { IconName } from "./Icon";
+
+interface ServiceItem {
+  icon: IconName;
+  title: string;
+  copy: string;
+}
+
+interface ServiceGroup {
+  eyebrow: string;
+  title: string;
+  description: string;
+  services: ServiceItem[];
+}
+
+const serviceGroups: ServiceGroup[] = [
+  {
+    eyebrow: "For individuals",
+    title: "Build skills that move your career forward.",
+    description:
+      "Go from AI-curious to career-ready with practical training, a supportive community, and guidance for your next move.",
+    services: [
+      {
+        icon: "training",
+        title: "AI Training",
+        copy: "Learn in-demand AI skills through guided labs, modern tools, and real-world projects.",
+      },
+      {
+        icon: "community",
+        title: "AI Community",
+        copy: "Learn alongside ambitious peers, share ideas, and grow with a community built around progress.",
+      },
+      {
+        icon: "briefcase",
+        title: "AI Job Assistance",
+        copy: "Turn your skills into momentum with portfolio guidance, interview preparation, and career support.",
+      },
+    ],
+  },
+  {
+    eyebrow: "For businesses",
+    title: "Put AI to work across your organization.",
+    description:
+      "Equip your workforce, identify practical opportunities, and move from AI ambition to measurable business value.",
+    services: [
+      {
+        icon: "education",
+        title: "AI Education & Corporate Training",
+        copy: "Build practical AI fluency with tailored workforce upskilling for teams and leaders.",
+      },
+      {
+        icon: "building",
+        title: "AI Solutions",
+        copy: "Design enterprise AI solutions around real workflows, customer needs, and business priorities.",
+      },
+      {
+        icon: "consulting",
+        title: "AI Consulting",
+        copy: "Clarify your roadmap with grounded strategy, use-case discovery, and implementation guidance.",
+      },
+    ],
+  },
+];
+
+export default function ServicesSection() {
+  return (
+    <section className="intro section-pad" id="programs">
+      <div className="section-container">
+        <div className="section-heading reveal">
+          <div>
+            <p className="eyebrow">What we do</p>
+            <h2>From AI learning to real-world application.</h2>
+          </div>
+          <p>
+            LLM AXIS helps individuals and organizations develop practical AI
+            skills through hands-on learning, expert guidance, community, and
+            corporate training.
+          </p>
+        </div>
+
+        <div className="service-groups">
+          {serviceGroups.map((group, groupIndex) => (
+            <article
+              className={`service-group reveal ${
+                groupIndex === 1 ? "business-group" : ""
+              }`}
+              id={groupIndex === 1 ? "business" : undefined}
+              key={group.title}
+            >
+              <div className="group-intro">
+                <p className="eyebrow">{group.eyebrow}</p>
+                <h3>{group.title}</h3>
+                <p>{group.description}</p>
+                <a href="#contact" className="text-button">
+                  {groupIndex === 0
+                    ? "Find your program"
+                    : "Explore a partnership"}{" "}
+                  <Icon name="arrow" size={17} />
+                </a>
+              </div>
+              <div className="service-cards">
+                {group.services.map((service) => (
+                  <div className="service-card" key={service.title}>
+                    <span className="service-icon">
+                      <Icon name={service.icon} />
+                    </span>
+                    <h4>{service.title}</h4>
+                    <p>{service.copy}</p>
+                    <span className="card-arrow">
+                      <Icon name="arrow" size={18} />
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}

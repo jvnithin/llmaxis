@@ -1,12 +1,11 @@
-import Hero from "@/components/sections/Hero";
-import CaseStudies from "@/components/sections/CaseStudies";
-import Testimonials from "@/components/sections/Testimonials";
-import LeadForm from "@/components/sections/LeadForm";
-import CTA from "@/components/sections/CTA";
-import Programs from "@/components/sections/programs";
-import HowLearningWorks from "@/components/sections/HowLearningWorks";
-import Features from "@/components/sections/Features";
-import CompanyLogos from "@/components/sections/CompanyLogos";
+import "@/components/home/home.css";
+import HomeClientWrapper from "@/components/home/HomeClientWrapper";
+import HeroSection from "@/components/home/HeroSection";
+import ServicesSection from "@/components/home/ServicesSection";
+import WhySection from "@/components/home/WhySection";
+import ExperienceSection from "@/components/home/ExperienceSection";
+import StoriesSection from "@/components/home/StoriesSection";
+import ContactSection from "@/components/home/ContactSection";
 
 export const metadata = {
   title: "AI Bootcamp | Learn AI with Real Projects | LLM Axis",
@@ -32,7 +31,7 @@ export const metadata = {
     siteName: "LLM Axis",
     images: [
       {
-        url: "/logo.jpeg", 
+        url: "/logo.jpeg",
         width: 1200,
         height: 630,
       },
@@ -44,8 +43,7 @@ export const metadata = {
   twitter: {
     card: "summary_large_image",
     title: "AI Bootcamp | LLM Axis",
-    description:
-      "Learn AI with real-world projects and expert mentorship.",
+    description: "Learn AI with real-world projects and expert mentorship.",
     images: ["/og-image.png"],
   },
 
@@ -58,15 +56,14 @@ export const metadata = {
 export default function Home() {
   return (
     <main>
-      <Hero />
-      <HowLearningWorks />
-      <Programs />
-      <Features />
-      <CaseStudies />
-      <CompanyLogos />
-      <Testimonials />
-      <LeadForm />
-      <CTA />
+      <HomeClientWrapper>
+        <HeroSection />
+        <ServicesSection />
+        <WhySection />
+        <ExperienceSection />
+        <StoriesSection />
+        <ContactSection />
+      </HomeClientWrapper>
     </main>
   );
 }
