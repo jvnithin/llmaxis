@@ -11,8 +11,12 @@ interface AppLayoutProps {
 export default function AppLayout({ children }: AppLayoutProps) {
   const pathname = usePathname();
 
-  // /advertisment is a self-contained campaign landing page with its own AdvertisementFooter
-  if (pathname?.startsWith("/advertisment")) {
+  // /advertisment, /learning, and /programs have self-contained headers & footers
+  if (
+    pathname?.startsWith("/advertisment") ||
+    pathname?.startsWith("/learning") ||
+    pathname?.startsWith("/programs")
+  ) {
     return <main>{children}</main>;
   }
 

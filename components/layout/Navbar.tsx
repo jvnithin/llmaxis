@@ -2,107 +2,127 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
+import "./navbar.css";
 
-const Navbar = () => {
+export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+  const isLearning = pathname === "/learning" || pathname === "/programs";
 
   return (
-    <nav className="fixed top-0 w-full z-[999] bg-white border-b border-gray-100">
-      <div className="max-w-7xl mx-auto px-4 md:px-6 py-3 flex items-center justify-between">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
+    <header className="site-header">
+      <div className="nav-wrap">
+        {/* Brand Logo (from newllm2) */}
+        <Link className="brand" href="/" aria-label="LLM Axis home">
           <Image
-            src="/logo.jpeg"
-            alt="LLM Axis Logo"
-            width={80}
-            height={60}
-            className="object-contain md:w-[100px] md:h-[80px]"
+            src="/MainLogo.png"
+            alt="LLM Axis"
+            width={130}
+            height={47}
+            priority
+            className="brand-logo"
           />
-          <span className="font-semibold text-base md:text-lg text-[#0F172A]">
-            LLM Axis
-          </span>
         </Link>
 
-        {/* Desktop Menu */}
-        <div className="hidden md:flex items-center gap-10 text-sm font-medium text-[#334155]">
-          <Link href="/learning">Our  Programs</Link>
-          <Link href="/hire">Hire Talent</Link>
-          <Link href="/contact">Contact US</Link>
-        </div>
-
-        {/* Desktop CTA */}
-        <div className="hidden md:block">
+        {/* Center Nav Links (Previous sections: Our Programs, Hire Talent, Contact Us) */}
+        <nav
+          className={open ? "nav-links open" : "nav-links"}
+          aria-label="Primary navigation"
+        >
           <Link
             href="/learning"
-            className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-2.5 rounded-full text-sm font-medium shadow"
+            className={isLearning ? "active" : ""}
+            onClick={() => setOpen(false)}
           >
-            Get Started
+            Our Programs
           </Link>
-        </div>
+          <Link
+            href="/hire"
+            className={pathname === "/hire" ? "active" : ""}
+            onClick={() => setOpen(false)}
+          >
+            Hire Talent
+          </Link>
+          <Link
+            href="/contact"
+            className={pathname === "/contact" ? "active" : ""}
+            onClick={() => setOpen(false)}
+          >
+            Contact Us
+          </Link>
 
-        {/* Mobile Menu Button */}
-        <button
-          type="button"
-          className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition"
-          onClick={() => setOpen((prev) => !prev)}
+          {/* Mobile-only CTA in dropdown */}
+          <Link
+            href={isLearning ? "#enroll" : "/learning"}
+            className="nav-mobile-cta"
+            style={{ display: "none" }}
+            onClick={() => setOpen(false)}
+          >
+            Get Started →
+          </Link>
+        </nav>
+
+        {/* Desktop CTA Button (Get Started with arrow icon) */}
+        <Link
+          className="button-nav"
+          href={isLearning ? "#enroll" : "/learning"}
+          onClick={() => setOpen(false)}
         >
-          {open ? <X size={24} /> : <Menu size={24} />}
+          Get Started
+          <svg
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M5 12h14M13 6l6 6-6 6" />
+          </svg>
+        </Link>
+
+        {/* Mobile Hamburger Toggle Button */}
+        <button
+          className="menu-button"
+          type="button"
+          aria-label={open ? "Close navigation" : "Open navigation"}
+          aria-expanded={open}
+          onClick={() => setOpen(!open)}
+        >
+          {open ? (
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="m6 6 12 12M18 6 6 18" />
+            </svg>
+          ) : (
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M4 7h16M4 12h16M4 17h16" />
+            </svg>
+          )}
         </button>
       </div>
-
-      {/* Mobile Dropdown */}
-      {open && (
-        <div className="md:hidden bg-white border-t border-gray-100 shadow-lg absolute top-full left-0 w-full z-[999]">
-          <div className="px-5 py-6 space-y-5">
-            <Link
-              href="/"
-              onClick={() => setOpen(false)}
-              className="block text-base font-medium text-gray-700"
-            >
-              Home
-            </Link>
-
-            <Link
-              href="/learning"
-              onClick={() => setOpen(false)}
-              className="block text-base font-medium text-gray-700"
-            >
-              LLM Axis Learning
-            </Link>
-
-            <Link
-              href="/hire"
-              onClick={() => setOpen(false)}
-              className="block text-base font-medium text-gray-700"
-            >
-              Hire Talent
-            </Link>
-
-            <Link
-              href="/contact"
-              onClick={() => setOpen(false)}
-              className="block text-base font-medium text-gray-700"
-            >
-              Contact Us
-            </Link>
-
-            {/* Divider */}
-            <div className="border-t pt-4">
-              <Link
-                href="/learning"
-                onClick={() => setOpen(false)}
-                className="block text-center bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 rounded-full text-sm font-semibold"
-              >
-                Get Started
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
-    </nav>
+    </header>
   );
-};
-
-export default Navbar;
+}

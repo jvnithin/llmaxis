@@ -14,6 +14,7 @@ export async function POST(req: Request) {
       country,
       phone,
       amount,
+      event,
     } = await req.json();
 
     if (!orderId || !paymentId || !signature) {
@@ -37,6 +38,7 @@ export async function POST(req: Request) {
     const generatedSignature = hmac.digest("hex");
 
     const isAuthentic = generatedSignature === signature;
+    const selectedEvent = event || "Beyond ChatGPT: How AI Is Learning to Think, Act & Work";
 
     if (!isAuthentic) {
       console.error("Razorpay signature verification failed");
@@ -50,6 +52,7 @@ export async function POST(req: Request) {
         orderId,
         paymentId,
         amount,
+        event: selectedEvent,
       });
 
       return Response.json(
@@ -68,6 +71,7 @@ export async function POST(req: Request) {
       paymentId,
       orderId,
       amount: amount || `₹${process.env.EVENT_PRICE_INR || 499}`,
+      event: selectedEvent,
     });
 
     // Optionally dispatch server-side Purchase event via Meta Conversions API

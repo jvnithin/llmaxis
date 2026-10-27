@@ -4,7 +4,7 @@ import { saveEventLeadToGoogleSheet } from "@/lib/googleSheets";
 
 export async function POST(req: Request) {
   try {
-    const { name, email, country, phone } = await req.json();
+    const { name, email, country, phone, event } = await req.json();
 
     if (!name || !email || !phone) {
       return Response.json(
@@ -33,6 +33,7 @@ export async function POST(req: Request) {
     const price = Number(process.env.EVENT_PRICE) || 1;
     const amountInSubunits = price * 100; // 1 USD = 100 cents
     const priceFormatted = currency === "USD" ? `$${price}` : `₹${price}`;
+    const selectedEvent = event || "Beyond ChatGPT: How AI Is Learning to Think, Act & Work";
 
     // 1. Create order in Razorpay
     const order = await razorpay.orders.create({
@@ -44,7 +45,7 @@ export async function POST(req: Request) {
         email,
         phone,
         country: country || "India",
-        event: "Beyond ChatGPT: How AI Is Learning to Think, Act & Work",
+        event: selectedEvent,
       },
     });
 
@@ -58,6 +59,7 @@ export async function POST(req: Request) {
       paymentStatus: "Pending",
       orderId: order.id,
       amount: priceFormatted,
+      event: selectedEvent,
     });
 
     return Response.json({

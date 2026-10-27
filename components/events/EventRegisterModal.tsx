@@ -5,6 +5,7 @@ import { X, CheckCircle2, MessageCircle, Lock, ShieldCheck, AlertCircle } from "
 import { event as trackFbEvent } from "@/lib/fpixel";
 
 const APPS_SCRIPT_URL =
+  process.env.NEXT_PUBLIC_ENROLLMENT_APPS_SCRIPT_URL ||
   process.env.NEXT_PUBLIC_GOOGLE_SHEET_APPS_SCRIPT_URL ||
   process.env.GOOGLE_SHEET_APPS_SCRIPT_URL ||
   "https://script.google.com/macros/s/AKfycbwN30PSI9aAWqjOahuzx7R1ID6qCMyDbRadRi_e3nLvm2TV_Gw7b6Br6glrXtKzcEoq/exec";
@@ -86,6 +87,11 @@ export const countries = [
 interface EventRegisterModalProps {
   isOpen: boolean;
   onClose: () => void;
+  title?: string;
+  badge?: string;
+  subtitle?: string;
+  eventName?: string;
+  description?: string;
 }
 
 const loadRazorpaySDK = (): Promise<boolean> => {
@@ -111,15 +117,20 @@ const sendToGoogleSheet = async (data: {
   paymentId?: string;
   orderId?: string;
   amount?: string;
+  event?: string;
 }) => {
   try {
     const formattedPhone = data.phone.startsWith("'") ? data.phone : `'${data.phone}`;
-    const spreadsheetId = "14p_q7p7iYU2ZtNaZCcr845-Mb13nOaW8AxqrpLjLKLE";
+    const spreadsheetId =
+      process.env.NEXT_PUBLIC_ENROLLMENT_SPREADSHEET_ID ||
+      process.env.NEXT_PUBLIC_GOOGLE_SHEET_ID ||
+      process.env.GOOGLE_SHEET_ID ||
+      "14p_q7p7iYU2ZtNaZCcr845-Mb13nOaW8AxqrpLjLKLE";
 
     const params = new URLSearchParams({
       source: "event_registration",
       sheet_id: spreadsheetId,
-      event: "Beyond ChatGPT: How AI Is Learning to Think, Act & Work",
+      event: data.event || "Beyond ChatGPT: How AI Is Learning to Think, Act & Work",
       name: data.name,
       email: data.email,
       country: data.country,
@@ -143,6 +154,11 @@ const sendToGoogleSheet = async (data: {
 export default function EventRegisterModal({
   isOpen,
   onClose,
+  title = "Register for Event",
+  badge = "Live Masterclass",
+  subtitle = "Enter your details to proceed to secure Razorpay checkout.",
+  eventName = "Beyond ChatGPT: How AI Is Learning to Think, Act & Work",
+  description,
 }: EventRegisterModalProps) {
   const [form, setForm] = useState({
     name: "",
@@ -172,13 +188,13 @@ export default function EventRegisterModal({
   useEffect(() => {
     if (isOpen) {
       trackFbEvent("ViewContent", {
-        content_name: "Beyond ChatGPT: How AI Is Learning to Think, Act & Work",
-        content_category: "Event Registration",
+        content_name: eventName,
+        content_category: "Registration",
         currency: eventCurrency,
         value: Number(eventPrice) || 1,
       });
     }
-  }, [isOpen, eventCurrency, eventPrice]);
+  }, [isOpen, eventCurrency, eventPrice, eventName]);
 
   const handleCountryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selected = countries.find((c) => c.name === e.target.value);
@@ -211,14 +227,14 @@ export default function EventRegisterModal({
 
       // Track Lead and InitiateCheckout in Meta Pixel
       trackFbEvent("Lead", {
-        content_name: "Beyond ChatGPT: How AI Is Learning to Think, Act & Work",
-        content_category: "Event Registration",
+        content_name: eventName,
+        content_category: "Registration",
         currency: eventCurrency,
         value: Number(eventPrice) || 1,
       });
 
       trackFbEvent("InitiateCheckout", {
-        content_name: "Beyond ChatGPT: How AI Is Learning to Think, Act & Work",
+        content_name: eventName,
         currency: eventCurrency,
         value: Number(eventPrice) || 1,
         num_items: 1,
@@ -232,6 +248,7 @@ export default function EventRegisterModal({
         phone: formattedPhone,
         paymentStatus: "Pending",
         amount: amountFormatted,
+        event: eventName,
       });
 
       // 2. Load Razorpay Checkout SDK
@@ -254,6 +271,7 @@ export default function EventRegisterModal({
             email: form.email.trim(),
             country: form.country,
             phone: formattedPhone,
+            event: eventName,
           }),
         });
 
@@ -272,12 +290,14 @@ export default function EventRegisterModal({
         console.warn("Backend order creation skipped, using client gateway:", backendErr);
       }
 
+      const itemDescription = description || `${eventName} - LLM Axis`;
+
       const options: any = {
         key: backendKeyId,
         amount: orderAmount,
         currency: eventCurrency,
         name: "LLM Axis",
-        description: "Beyond ChatGPT: Generative & Agentic AI Masterclass",
+        description: itemDescription,
         image: "/logo.jpeg",
         prefill: {
           name: form.name.trim(),
@@ -301,11 +321,12 @@ export default function EventRegisterModal({
               paymentId: response.razorpay_payment_id,
               orderId: response.razorpay_order_id || backendOrderId || "N/A",
               amount: amountFormatted,
+              event: eventName,
             });
 
             // Track Purchase in Meta Pixel
             trackFbEvent("Purchase", {
-              content_name: "Beyond ChatGPT: Generative & Agentic AI Masterclass",
+              content_name: eventName,
               currency: eventCurrency,
               value: Number(eventPrice) || 1,
               transaction_id: response.razorpay_payment_id,
@@ -325,6 +346,7 @@ export default function EventRegisterModal({
                   country: form.country,
                   phone: formattedPhone,
                   amount: amountFormatted,
+                  event: eventName,
                 }),
               }).catch(() => {});
             }
@@ -356,6 +378,7 @@ export default function EventRegisterModal({
               paymentStatus: "Cancelled",
               orderId: backendOrderId || "N/A",
               amount: amountFormatted,
+              event: eventName,
             });
           },
         },
@@ -425,7 +448,7 @@ export default function EventRegisterModal({
                 Payment &amp; Registration Successful!
               </h3>
               <p className="text-slate-600 text-sm mt-2 leading-relaxed">
-                You are registered for <span className="font-semibold text-purple-700">Beyond ChatGPT</span>.
+                You are registered for <span className="font-semibold text-purple-700">{eventName}</span>.
               </p>
               {paymentInfo?.paymentId && (
                 <div className="mt-3 bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-600">
@@ -439,7 +462,9 @@ export default function EventRegisterModal({
 
             <div className="pt-3 space-y-2">
               <a
-                href="https://wa.me/918309782214?text=Hi%20LLM%20Axis,%20I%20have%20completed%20the%20payment%20for%20the%20Beyond%20ChatGPT%20Masterclass."
+                href={`https://wa.me/918309782214?text=${encodeURIComponent(
+                  `Hi LLM Axis, I have completed the payment for ${eventName}.`
+                )}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl text-sm font-semibold transition shadow-xs"
@@ -462,13 +487,13 @@ export default function EventRegisterModal({
             {/* Header */}
             <div className="mb-5 pr-6">
               <span className="inline-block bg-purple-100 text-purple-700 text-xs font-semibold px-2.5 py-0.5 rounded-full mb-2">
-                Live Masterclass
+                {badge}
               </span>
               <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-                Register for Event
+                {title}
               </h2>
               <p className="text-slate-500 text-xs sm:text-sm mt-1">
-                Enter your details to proceed to secure Razorpay checkout.
+                {subtitle}
               </p>
             </div>
 

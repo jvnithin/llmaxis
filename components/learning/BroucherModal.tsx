@@ -4,6 +4,7 @@ import { useState } from "react";
 import { event as trackFbEvent } from "@/lib/fpixel";
 
 const APPS_SCRIPT_URL =
+  process.env.NEXT_PUBLIC_BROCHURE_APPS_SCRIPT_URL ||
   "https://script.google.com/macros/s/AKfycbx07EJrG5Q-F-lj8SgyY-DIoNAPkiczXXyTf2VG_OQyhrVIqOoFuWE6q0ifvnb16z4L/exec";
 
 const countries = [

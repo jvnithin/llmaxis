@@ -1,4 +1,6 @@
 const DEFAULT_APPS_SCRIPT_URL =
+  process.env.ENROLLMENT_APPS_SCRIPT_URL ||
+  process.env.NEXT_PUBLIC_ENROLLMENT_APPS_SCRIPT_URL ||
   process.env.GOOGLE_SHEET_APPS_SCRIPT_URL ||
   process.env.NEXT_PUBLIC_GOOGLE_SHEET_APPS_SCRIPT_URL ||
   "https://script.google.com/macros/s/AKfycbwN30PSI9aAWqjOahuzx7R1ID6qCMyDbRadRi_e3nLvm2TV_Gw7b6Br6glrXtKzcEoq/exec";
@@ -17,7 +19,10 @@ export interface EventLeadData {
 
 export async function saveEventLeadToGoogleSheet(data: EventLeadData) {
   const spreadsheetId =
+    process.env.ENROLLMENT_SPREADSHEET_ID ||
+    process.env.NEXT_PUBLIC_ENROLLMENT_SPREADSHEET_ID ||
     process.env.GOOGLE_SHEET_ID ||
+    process.env.NEXT_PUBLIC_GOOGLE_SHEET_ID ||
     "14p_q7p7iYU2ZtNaZCcr845-Mb13nOaW8AxqrpLjLKLE";
 
   const params = new URLSearchParams({
