@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 44" width="100%" height="100%">
+  <!-- Left double parentheses -->
+  <path d="M14 6 C7 14, 7 30, 14 38 M21 10 C16 16, 16 28, 21 34" fill="none" stroke="#F37021" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- CENTRIC text -->
+  <text x="100" y="29" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="900" letter-spacing="0.12em" fill="#0B1B3D" text-anchor="middle">CENTRIC</text>
+  <!-- Right double parentheses -->
+  <path d="M186 6 C193 14, 193 30, 186 38 M179 10 C184 16, 184 28, 179 34" fill="none" stroke="#F37021" stroke-width="3.5" stroke-linecap="round"/>
+</svg>
+

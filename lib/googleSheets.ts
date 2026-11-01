@@ -1,3 +1,5 @@
+import { formatEventPrice } from "@/lib/eventPrice";
+
 const DEFAULT_APPS_SCRIPT_URL =
   process.env.ENROLLMENT_APPS_SCRIPT_URL ||
   process.env.NEXT_PUBLIC_ENROLLMENT_APPS_SCRIPT_URL ||
@@ -39,7 +41,7 @@ export async function saveEventLeadToGoogleSheet(data: EventLeadData) {
     payment_status: data.paymentStatus,
     payment_id: data.paymentId || "N/A",
     order_id: data.orderId || "N/A",
-    amount: data.amount ? String(data.amount) : "$1",
+    amount: data.amount ? String(data.amount) : formatEventPrice(),
     timestamp: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }),
   });
 

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import Razorpay from "razorpay";
+import { eventCurrency, eventPrice, formatEventPrice } from "@/lib/eventPrice";
 import { saveEventLeadToGoogleSheet } from "@/lib/googleSheets";
 
 export async function POST(req: Request) {
@@ -29,10 +30,10 @@ export async function POST(req: Request) {
       key_secret: keySecret,
     });
 
-    const currency = process.env.EVENT_CURRENCY || "USD";
-    const price = Number(process.env.EVENT_PRICE) || 1;
-    const amountInSubunits = price * 100; // 1 USD = 100 cents
-    const priceFormatted = currency === "USD" ? `$${price}` : `₹${price}`;
+    const currency = eventCurrency();
+    const price = eventPrice();
+    const amountInSubunits = Math.round(price * 100);
+    const priceFormatted = formatEventPrice(price, currency);
     const selectedEvent = event || "Beyond ChatGPT: How AI Is Learning to Think, Act & Work";
 
     // 1. Create order in Razorpay

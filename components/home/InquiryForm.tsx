@@ -1,126 +1,137 @@
 "use client";
 
-import React, { FormEvent, useState } from "react";
+import { FormEvent, useState, type ReactNode } from "react";
 import Icon from "./Icon";
 import { event as trackFbEvent } from "@/lib/fpixel";
+import {
+  countries,
+  getCountry,
+  mobileLength,
+  mobileLengthLabel,
+  sanitizeNationalNumber,
+} from "@/lib/countries";
+import {
+  emptyHomeInquiry,
+  validateHomeInquiry,
+  type HomeInquiry,
+  type InquiryType,
+} from "@/lib/homeInquiry";
 
-const formTypes = ["Individuals", "Businesses", "Course Enquiries"];
+const formTypes: InquiryType[] = ["Individuals", "Businesses"];
 
 export default function InquiryForm() {
-  const [activeType, setActiveType] = useState(formTypes[0]);
-  const [submitted, setSubmitted] = useState(false);
+  const [inquiryType, setInquiryType] = useState<InquiryType>("Individuals");
+  const [details, setDetails] = useState<HomeInquiry>(emptyHomeInquiry);
+  const [errors, setErrors] = useState<Partial<Record<keyof HomeInquiry, string>>>({});
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [submitError, setSubmitError] = useState("");
+  const selectedCountry = getCountry(details.country);
 
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    interest: "",
-    message: "",
-  });
+  function currentDetails(next: Partial<HomeInquiry> = {}) {
+    return { ...details, inquiryType, ...next };
+  }
 
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
-  ) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-    if (error) setError("");
-  };
+  function update(next: HomeInquiry) {
+    setDetails(next);
+    setSubmitError("");
+    setErrors((current) => refreshErrors(current, next));
+  }
+
+  function refreshErrors(
+    current: Partial<Record<keyof HomeInquiry, string>>,
+    next: HomeInquiry,
+  ) {
+    const checked = validateHomeInquiry(next);
+    const updated = { ...current };
+    (Object.keys(current) as (keyof HomeInquiry)[]).forEach((field) => {
+      if (current[field]) updated[field] = checked[field];
+    });
+    return updated;
+  }
+
+  function blur(field: keyof HomeInquiry) {
+    const checked = validateHomeInquiry(currentDetails());
+    setErrors((current) => ({ ...current, [field]: checked[field] }));
+  }
+
+  function switchType(type: InquiryType) {
+    const next = currentDetails({
+      inquiryType: type,
+      company: type === "Individuals" ? "" : details.company,
+    });
+    setInquiryType(type);
+    setDetails(next);
+    setSubmitError("");
+    setErrors({});
+  }
+
+  function updateCountry(name: string) {
+    const country = getCountry(name);
+    update(
+      currentDetails({
+        country: name,
+        phone: country ? sanitizeNationalNumber(details.phone, country) : "",
+      }),
+    );
+  }
+
+  function updatePhone(raw: string) {
+    if (!selectedCountry) {
+      setErrors((current) => ({
+        ...current,
+        country: "Select your country.",
+        phone: "Select your country first.",
+      }));
+      return;
+    }
+    update(currentDetails({ phone: sanitizeNationalNumber(raw, selectedCountry) }));
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
-    if (!formData.name || !formData.email) {
-      setError("Please fill in your name and email.");
-      return;
-    }
+    const next = currentDetails();
+    const nextErrors = validateHomeInquiry(next);
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
 
     setLoading(true);
-    setError("");
-
+    setSubmitError("");
     try {
-      // 1. Send to server-side Next.js route connected to Google Sheets
-      const res = await fetch("/api/inquiry", {
+      const response = await fetch("/api/inquiry", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          inquiryType: activeType,
-          interest: formData.interest || "General",
-          message: formData.message,
+          inquiryType: next.inquiryType,
+          name: next.name.trim().replace(/\s+/g, " "),
+          email: next.email.trim(),
+          company: next.inquiryType === "Businesses" ? next.company.trim().replace(/\s+/g, " ") : "",
+          country: next.country,
+          phone: next.phone,
+          message: next.message.trim(),
         }),
       });
-
-      if (!res.ok) {
-        // Fallback: direct call if client-side environment variable is present
-        const directUrl = process.env.NEXT_PUBLIC_INQUIRY_APPS_SCRIPT_URL;
-        if (directUrl) {
-          const params = new URLSearchParams({
-            name: formData.name,
-            email: formData.email,
-            inquiryType: activeType,
-            interest: formData.interest || "General",
-            message: formData.message,
-            source: "home_inquiry_form",
-            timestamp: new Date().toLocaleString("en-IN", {
-              timeZone: "Asia/Kolkata",
-            }),
-          });
-          await fetch(`${directUrl}?${params.toString()}`, {
-            method: "GET",
-            mode: "no-cors",
-          });
-        }
+      const payload = await response.json().catch(() => null);
+      if (!response.ok) {
+        if (payload?.fields) setErrors(payload.fields);
+        throw new Error(typeof payload?.error === "string" ? payload.error : "Request failed");
       }
 
-      // 2. Track Lead in Meta Pixel
       trackFbEvent("Lead", {
-        content_name: activeType,
-        interest: formData.interest || "General",
+        content_name: next.inquiryType,
         source: "home_inquiry_form",
       });
-
-      setSubmitted(true);
-      setFormData({ name: "", email: "", interest: "", message: "" });
-    } catch (err: any) {
-      console.error("Form submission error:", err);
-      setError("Something went wrong while sending. Please try again.");
+      setErrors({});
+      setDetails({ ...emptyHomeInquiry, inquiryType: next.inquiryType });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "";
+      setSubmitError(
+        message && message !== "Request failed"
+          ? message
+          : "Something went wrong while sending. Please try again.",
+      );
     } finally {
       setLoading(false);
     }
-  }
-
-  function handleReset() {
-    setSubmitted(false);
-    setError("");
-    setFormData({ name: "", email: "", interest: "", message: "" });
-  }
-
-  if (submitted) {
-    return (
-      <div className="success-state" role="status">
-        <span className="success-icon">
-          <Icon name="check" size={30} />
-        </span>
-        <p className="eyebrow">Inquiry received</p>
-        <h3>Thanks for reaching out!</h3>
-        <p>
-          Your inquiry has been successfully recorded. Our team will review your
-          goals and connect with you shortly.
-        </p>
-        <button
-          className="text-button"
-          type="button"
-          onClick={handleReset}
-        >
-          Submit another inquiry <Icon name="arrow" size={17} />
-        </button>
-      </div>
-    );
   }
 
   return (
@@ -128,113 +139,151 @@ export default function InquiryForm() {
       <div className="form-tabs" role="tablist" aria-label="Inquiry type">
         {formTypes.map((type) => (
           <button
-            className={activeType === type ? "active" : ""}
+            className={inquiryType === type ? "active" : ""}
             key={type}
             type="button"
             role="tab"
-            aria-selected={activeType === type}
-            onClick={() => setActiveType(type)}
+            aria-selected={inquiryType === type}
+            onClick={() => switchType(type)}
           >
             {type}
           </button>
         ))}
       </div>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} noValidate>
         <div className="form-grid">
-          <label>
-            <span>Name</span>
+          <Field label="Name" error={errors.name}>
             <input
               name="name"
               type="text"
               placeholder="Your full name"
               autoComplete="name"
-              required
-              value={formData.name}
-              onChange={handleChange}
+              maxLength={80}
+              value={details.name}
+              aria-invalid={Boolean(errors.name)}
+              onChange={(event) => update(currentDetails({ name: event.target.value }))}
+              onBlur={() => blur("name")}
             />
-          </label>
-          <label>
-            <span>Email</span>
+          </Field>
+          <Field label={inquiryType === "Businesses" ? "Company email" : "Email"} error={errors.email}>
             <input
               name="email"
               type="email"
-              placeholder="you@company.com"
+              placeholder={inquiryType === "Businesses" ? "name@company.com" : "you@email.com"}
               autoComplete="email"
-              required
-              value={formData.email}
-              onChange={handleChange}
+              maxLength={120}
+              value={details.email}
+              aria-invalid={Boolean(errors.email)}
+              onChange={(event) => update(currentDetails({ email: event.target.value }))}
+              onBlur={() => blur("email")}
             />
-          </label>
+          </Field>
         </div>
 
-        <label>
-          <span>Interest</span>
-          <select
-            name="interest"
-            value={formData.interest}
-            onChange={handleChange}
-          >
-            <option value="">Select your area of interest</option>
-            <option value="AI training programs">AI training programs</option>
-            <option value="AI community">AI community</option>
-            <option value="Job assistance">Job assistance</option>
-            <option value="Corporate training">Corporate training</option>
-            <option value="AI solutions">AI solutions</option>
-            <option value="AI consulting">AI consulting</option>
-          </select>
-        </label>
+        {inquiryType === "Businesses" ? (
+          <Field label="Company" error={errors.company}>
+            <input
+              name="organization"
+              type="text"
+              placeholder="Your company name"
+              autoComplete="organization"
+              maxLength={120}
+              value={details.company}
+              aria-invalid={Boolean(errors.company)}
+              onChange={(event) => update(currentDetails({ company: event.target.value }))}
+              onBlur={() => blur("company")}
+            />
+          </Field>
+        ) : null}
 
-        <label>
-          <span>Message</span>
+        <div className="form-grid">
+          <Field label="Country" error={errors.country}>
+            <select
+              name="country"
+              value={details.country}
+              autoComplete="country-name"
+              aria-invalid={Boolean(errors.country)}
+              onChange={(event) => updateCountry(event.target.value)}
+              onBlur={() => blur("country")}
+            >
+              <option value="">Select your country</option>
+              {countries.map((country) => (
+                <option key={country.code} value={country.name}>
+                  {country.name} ({country.dial})
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Mobile number" error={errors.phone}>
+            <span className="inquiry-phone">
+              <span className={selectedCountry ? "inquiry-dial" : "inquiry-dial is-empty"}>
+                {selectedCountry?.dial ?? "Code"}
+              </span>
+              <input
+                name="tel"
+                type="tel"
+                inputMode="numeric"
+                autoComplete="tel-national"
+                placeholder={selectedCountry ? mobileLengthLabel(selectedCountry) : "Select a country first"}
+                maxLength={selectedCountry ? mobileLength(selectedCountry)[1] : 15}
+                value={details.phone}
+                disabled={!selectedCountry}
+                aria-invalid={Boolean(errors.phone)}
+                onChange={(event) => updatePhone(event.target.value)}
+                onBlur={() => blur("phone")}
+              />
+            </span>
+          </Field>
+        </div>
+
+        <Field label="Message" error={errors.message}>
           <textarea
             name="message"
             rows={4}
+            maxLength={1000}
             placeholder={
-              activeType === "Businesses"
+              inquiryType === "Businesses"
                 ? "Tell us about your team and AI goals."
                 : "Tell us what you want to learn or achieve."
             }
-            required
-            value={formData.message}
-            onChange={handleChange}
+            value={details.message}
+            aria-invalid={Boolean(errors.message)}
+            onChange={(event) => update(currentDetails({ message: event.target.value }))}
+            onBlur={() => blur("message")}
           />
-        </label>
+        </Field>
 
-        {error && (
-          <p
-            style={{
-              color: "#EF4444",
-              fontSize: "12px",
-              margin: "-5px 0 0",
-              fontWeight: 600,
-            }}
-          >
-            {error}
-          </p>
-        )}
+        {submitError ? <p className="form-error">{submitError}</p> : null}
 
         <button
           className="button button-primary button-wide"
           type="submit"
           disabled={loading}
-          style={{ opacity: loading ? 0.7 : 1, cursor: loading ? "wait" : "pointer" }}
         >
-          {loading ? (
-            "Sending..."
-          ) : (
-            <>
-              Send{" "}
-              {activeType === "Course Enquiries" ? "course inquiry" : "inquiry"}{" "}
-              <Icon name="arrow" size={19} />
-            </>
-          )}
+          {loading ? "Sending..." : <>Send inquiry <Icon name="arrow" size={19} /></>}
         </button>
 
-        <p className="form-note">
-          No spam. Just a focused conversation about your goals.
-        </p>
+        <p className="form-note">No spam. Just a focused conversation about your goals.</p>
       </form>
     </div>
+  );
+}
+
+function Field({
+  label,
+  error,
+  children,
+}: {
+  label: string;
+  error?: string;
+  children: ReactNode;
+}) {
+  return (
+    <label>
+      <span>{label}</span>
+      {children}
+      {error ? <small>{error}</small> : null}
+    </label>
   );
 }

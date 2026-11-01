@@ -95,31 +95,8 @@ export default function ContactPage() {
     <main>
       <section className="min-h-screen bg-[#F7F8FC] flex items-center justify-center px-4 md:px-6 py-16">
         <div className="bg-white rounded-3xl p-6 md:p-10 max-w-5xl w-full shadow-sm grid md:grid-cols-2 gap-6 md:gap-10">
-          {/* LEFT */}
-          {/* <div className="flex flex-col justify-center">
-            ✅ Proper heading
-            <h1 className="text-2xl md:text-3xl font-bold text-[#0F172A] leading-tight">
-              Hire Industry-Ready{" "}
-              <span className="bg-gradient-to-r from-purple-600 to-indigo-600 text-transparent bg-clip-text">
-                AI Talent
-              </span>
-            </h1>
-
-            ✅ Keyword enriched
-            <p className="text-gray-500 mt-3 text-sm md:text-base leading-relaxed">
-              Connect with skilled AI engineers trained in real-world machine learning,
-              automation, and full-stack AI development projects.
-            </p>
-
-            <div className="mt-5 flex gap-3 flex-wrap">
-              <button className="bg-gradient-to-r from-purple-600 to-indigo-600 text-black px-5 py-2 rounded-full text-sm">
-                Book Call
-              </button>
-              <button className="border px-5 py-2 rounded-full text-sm">
-                View Skills
-              </button>
-            </div>
-          </div> */}
+          
+          
 
           {/* LEFT FORM */}
           {submitted ? (

@@ -1,0 +1,39 @@
+.community-links {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+}
+
+.community-links a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 52px;
+  padding: 0 16px;
+  border-radius: 12px;
+  background: #128c7e;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.community-link-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.community-links svg {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.community-links a.is-discord {
+  background: #5865f2;
+}
+
+.community-links a:hover {
+  filter: brightness(1.05);
+}

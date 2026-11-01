@@ -3,86 +3,15 @@
 import { useState, useEffect } from "react";
 import { X, CheckCircle2, MessageCircle, Lock, ShieldCheck, AlertCircle } from "lucide-react";
 import { event as trackFbEvent } from "@/lib/fpixel";
+import { countries } from "@/lib/countries";
+
+export { countries };
 
 const APPS_SCRIPT_URL =
   process.env.NEXT_PUBLIC_ENROLLMENT_APPS_SCRIPT_URL ||
   process.env.NEXT_PUBLIC_GOOGLE_SHEET_APPS_SCRIPT_URL ||
   process.env.GOOGLE_SHEET_APPS_SCRIPT_URL ||
   "https://script.google.com/macros/s/AKfycbwN30PSI9aAWqjOahuzx7R1ID6qCMyDbRadRi_e3nLvm2TV_Gw7b6Br6glrXtKzcEoq/exec";
-
-export const countries = [
-  { name: "India", code: "IN", dial: "+91" },
-  { name: "United States", code: "US", dial: "+1" },
-  { name: "United Kingdom", code: "GB", dial: "+44" },
-  { name: "Canada", code: "CA", dial: "+1" },
-  { name: "Australia", code: "AU", dial: "+61" },
-  { name: "United Arab Emirates", code: "AE", dial: "+971" },
-  { name: "Singapore", code: "SG", dial: "+65" },
-  { name: "Germany", code: "DE", dial: "+49" },
-  { name: "Afghanistan", code: "AF", dial: "+93" },
-  { name: "Albania", code: "AL", dial: "+355" },
-  { name: "Algeria", code: "DZ", dial: "+213" },
-  { name: "Argentina", code: "AR", dial: "+54" },
-  { name: "Austria", code: "AT", dial: "+43" },
-  { name: "Bangladesh", code: "BD", dial: "+880" },
-  { name: "Belgium", code: "BE", dial: "+32" },
-  { name: "Brazil", code: "BR", dial: "+55" },
-  { name: "Chile", code: "CL", dial: "+56" },
-  { name: "China", code: "CN", dial: "+86" },
-  { name: "Colombia", code: "CO", dial: "+57" },
-  { name: "Denmark", code: "DK", dial: "+45" },
-  { name: "Egypt", code: "EG", dial: "+20" },
-  { name: "Ethiopia", code: "ET", dial: "+251" },
-  { name: "Finland", code: "FI", dial: "+358" },
-  { name: "France", code: "FR", dial: "+33" },
-  { name: "Ghana", code: "GH", dial: "+233" },
-  { name: "Greece", code: "GR", dial: "+30" },
-  { name: "Hong Kong", code: "HK", dial: "+852" },
-  { name: "Hungary", code: "HU", dial: "+36" },
-  { name: "Indonesia", code: "ID", dial: "+62" },
-  { name: "Iran", code: "IR", dial: "+98" },
-  { name: "Iraq", code: "IQ", dial: "+964" },
-  { name: "Ireland", code: "IE", dial: "+353" },
-  { name: "Israel", code: "IL", dial: "+972" },
-  { name: "Italy", code: "IT", dial: "+39" },
-  { name: "Japan", code: "JP", dial: "+81" },
-  { name: "Jordan", code: "JO", dial: "+962" },
-  { name: "Kenya", code: "KE", dial: "+254" },
-  { name: "Kuwait", code: "KW", dial: "+965" },
-  { name: "Malaysia", code: "MY", dial: "+60" },
-  { name: "Mexico", code: "MX", dial: "+52" },
-  { name: "Morocco", code: "MA", dial: "+212" },
-  { name: "Myanmar", code: "MM", dial: "+95" },
-  { name: "Nepal", code: "NP", dial: "+977" },
-  { name: "Netherlands", code: "NL", dial: "+31" },
-  { name: "New Zealand", code: "NZ", dial: "+64" },
-  { name: "Nigeria", code: "NG", dial: "+234" },
-  { name: "Norway", code: "NO", dial: "+47" },
-  { name: "Oman", code: "OM", dial: "+968" },
-  { name: "Pakistan", code: "PK", dial: "+92" },
-  { name: "Philippines", code: "PH", dial: "+63" },
-  { name: "Poland", code: "PL", dial: "+48" },
-  { name: "Portugal", code: "PT", dial: "+351" },
-  { name: "Qatar", code: "QA", dial: "+974" },
-  { name: "Romania", code: "RO", dial: "+40" },
-  { name: "Russia", code: "RU", dial: "+7" },
-  { name: "Saudi Arabia", code: "SA", dial: "+966" },
-  { name: "South Africa", code: "ZA", dial: "+27" },
-  { name: "South Korea", code: "KR", dial: "+82" },
-  { name: "Spain", code: "ES", dial: "+34" },
-  { name: "Sri Lanka", code: "LK", dial: "+94" },
-  { name: "Sweden", code: "SE", dial: "+46" },
-  { name: "Switzerland", code: "CH", dial: "+41" },
-  { name: "Taiwan", code: "TW", dial: "+886" },
-  { name: "Tanzania", code: "TZ", dial: "+255" },
-  { name: "Thailand", code: "TH", dial: "+66" },
-  { name: "Turkey", code: "TR", dial: "+90" },
-  { name: "Uganda", code: "UG", dial: "+256" },
-  { name: "Ukraine", code: "UA", dial: "+380" },
-  { name: "Vietnam", code: "VN", dial: "+84" },
-  { name: "Yemen", code: "YE", dial: "+967" },
-  { name: "Zimbabwe", code: "ZW", dial: "+263" },
-];
 
 interface EventRegisterModalProps {
   isOpen: boolean;
@@ -138,7 +67,11 @@ const sendToGoogleSheet = async (data: {
       payment_status: data.paymentStatus,
       payment_id: data.paymentId || "N/A",
       order_id: data.orderId || "N/A",
-      amount: data.amount || "$1",
+      amount:
+        data.amount ||
+        (process.env.NEXT_PUBLIC_EVENT_CURRENCY === "INR"
+          ? `₹${process.env.NEXT_PUBLIC_EVENT_PRICE || "206"}`
+          : `$${process.env.NEXT_PUBLIC_EVENT_PRICE || "206"}`),
       timestamp: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }),
     });
 
@@ -176,7 +109,7 @@ export default function EventRegisterModal({
   } | null>(null);
   const [error, setError] = useState("");
 
-  const eventPrice = process.env.NEXT_PUBLIC_EVENT_PRICE || "1";
+  const eventPrice = process.env.NEXT_PUBLIC_EVENT_PRICE || "206";
   const eventCurrency = process.env.NEXT_PUBLIC_EVENT_CURRENCY || "USD";
   const defaultFormattedPrice = eventCurrency === "USD" ? `$${eventPrice}` : `₹${eventPrice}`;
   const defaultKeyId =
@@ -260,7 +193,7 @@ export default function EventRegisterModal({
       // 3. Attempt server order creation if backend endpoint is available (safe fallback for static deployments)
       let backendKeyId = defaultKeyId;
       let backendOrderId: string | undefined = undefined;
-      let orderAmount = (Number(eventPrice) || 1) * 100; // 100 cents = $1.00 USD
+      let orderAmount = Math.round((Number(eventPrice) || 206) * 100);
 
       try {
         const res = await fetch("/api/events/create-order", {

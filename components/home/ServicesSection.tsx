@@ -1,5 +1,11 @@
-import React from "react";
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
 import Icon, { IconName } from "./Icon";
+import BusinessEnquiryModal from "./business-enquiry/BusinessEnquiryModal";
+import CommunityJoinModal from "./community/CommunityJoinModal";
+import JobAssistanceModal from "./job-assistance/JobAssistanceModal";
 
 interface ServiceItem {
   icon: IconName;
@@ -64,6 +70,10 @@ const serviceGroups: ServiceGroup[] = [
 ];
 
 export default function ServicesSection() {
+  const [activeService, setActiveService] = useState<string | null>(null);
+  const [communityOpen, setCommunityOpen] = useState(false);
+  const [jobAssistanceOpen, setJobAssistanceOpen] = useState(false);
+
   return (
     <section className="intro section-pad" id="programs">
       <div className="section-container">
@@ -100,23 +110,84 @@ export default function ServicesSection() {
                 </a>
               </div>
               <div className="service-cards">
-                {group.services.map((service) => (
-                  <div className="service-card" key={service.title}>
-                    <span className="service-icon">
-                      <Icon name={service.icon} />
-                    </span>
-                    <h4>{service.title}</h4>
-                    <p>{service.copy}</p>
-                    <span className="card-arrow">
-                      <Icon name="arrow" size={18} />
-                    </span>
-                  </div>
-                ))}
+                {group.services.map((service) => {
+                  const card = (
+                    <>
+                      <span className="service-icon">
+                        <Icon name={service.icon} />
+                      </span>
+                      <h4>{service.title}</h4>
+                      <p>{service.copy}</p>
+                      <span className="card-arrow">
+                        <Icon name="arrow" size={18} />
+                      </span>
+                    </>
+                  );
+
+                  if (service.title === "AI Training") {
+                    return (
+                      <Link href="/learning" className="service-card is-action" key={service.title}>
+                        {card}
+                      </Link>
+                    );
+                  }
+
+                  if (service.title === "AI Community") {
+                    return (
+                      <button
+                        type="button"
+                        className="service-card is-action"
+                        key={service.title}
+                        onClick={() => setCommunityOpen(true)}
+                      >
+                        {card}
+                      </button>
+                    );
+                  }
+
+                  if (service.title === "AI Job Assistance") {
+                    return (
+                      <button
+                        type="button"
+                        className="service-card is-action"
+                        key={service.title}
+                        onClick={() => setJobAssistanceOpen(true)}
+                      >
+                        {card}
+                      </button>
+                    );
+                  }
+
+                  if (groupIndex !== 1) {
+                    return (
+                      <div className="service-card" key={service.title}>
+                        {card}
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <button
+                      type="button"
+                      className="service-card is-action"
+                      key={service.title}
+                      onClick={() => setActiveService(service.title)}
+                    >
+                      {card}
+                    </button>
+                  );
+                })}
               </div>
             </article>
           ))}
         </div>
       </div>
+      <BusinessEnquiryModal
+        serviceTitle={activeService}
+        onClose={() => setActiveService(null)}
+      />
+      <CommunityJoinModal open={communityOpen} onClose={() => setCommunityOpen(false)} />
+      <JobAssistanceModal open={jobAssistanceOpen} onClose={() => setJobAssistanceOpen(false)} />
     </section>
   );
 }

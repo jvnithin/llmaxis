@@ -14,15 +14,15 @@ const testimonials: TestimonialItem[] = [
   {
     quote:
       "The projects made complex AI concepts much easier to understand and apply. My practical skills and confidence working with modern GenAI tools and workflows grew.",
-    name: "Sarah Miller",
-    role: "Data Science Learner",
+    name: "Suman",
+    role: "Data Scientist",
     initials: "SM",
   },
   {
     quote:
       "I really enjoyed the balance between concepts, hands-on labs, and real-world AI applications. It helped me turn what I learned into projects I could actually showcase.",
-    name: "David Chen",
-    role: "AI Engineer in Training",
+    name: "Nandhini",
+    role: "AI Engineer",
     initials: "DC",
   },
 ];

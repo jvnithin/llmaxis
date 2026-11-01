@@ -6,7 +6,7 @@ export const metadata = {
 
 export default function TermsPage() {
   return (
-    <main className="max-w-4xl mx-auto px-6 py-16 text-sm leading-relaxed">
+    <main className="max-w-4xl mx-auto px-6 pt-36 pb-16 text-sm leading-relaxed">
       <h1 className="text-3xl font-bold mb-6">Terms & Conditions</h1>
 
       <p><strong>Effective Date:</strong> 19/03/2026</p>
@@ -29,7 +29,13 @@ export default function TermsPage() {
       </ul>
 
       <p className="mt-6">
-        For queries, contact: <strong>contact@llmaxis.in</strong>
+        For queries, contact:{" "}
+        <a
+          href="mailto:team@llmaxis.in"
+          className="font-bold text-blue-600 underline underline-offset-2 hover:text-blue-800"
+        >
+          team@llmaxis.in
+        </a>
       </p>
     </main>
   );

@@ -1,68 +1,54 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getCountry } from "@/lib/countries";
+import { appendInquiryRow } from "@/lib/inquirySheet";
+import { isInquiryType, validateHomeInquiry, type HomeInquiry } from "@/lib/homeInquiry";
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { name, email, inquiryType, interest, message } = body;
-
-    if (!name || !email) {
+    const inquiryType = String(body.inquiryType || "");
+    const details: HomeInquiry = {
+      inquiryType: isInquiryType(inquiryType) ? inquiryType : "Individuals",
+      name: String(body.name || ""),
+      email: String(body.email || ""),
+      company: String(body.company || ""),
+      country: String(body.country || ""),
+      phone: String(body.phone || ""),
+      message: String(body.message || ""),
+    };
+    if (!isInquiryType(inquiryType)) {
       return NextResponse.json(
-        { error: "Name and Email are required fields." },
-        { status: 400 }
+        { error: "Choose Individuals or Businesses.", fields: { inquiryType: "Choose Individuals or Businesses." } },
+        { status: 400 },
       );
     }
 
-    const scriptUrl =
-      process.env.INQUIRY_APPS_SCRIPT_URL ||
-      process.env.NEXT_PUBLIC_INQUIRY_APPS_SCRIPT_URL ||
-      process.env.GOOGLE_SHEET_APPS_SCRIPT_URL;
-
-    if (!scriptUrl) {
-      console.warn(
-        "No INQUIRY_APPS_SCRIPT_URL configured in environment variables."
-      );
-      // Still return 200 so UI continues gracefully in development
-      return NextResponse.json({
-        success: true,
-        warning: "Sheet URL not configured",
-      });
+    const errors = validateHomeInquiry(details);
+    if (Object.keys(errors).length > 0) {
+      return NextResponse.json({ error: "Check the highlighted fields.", fields: errors }, { status: 400 });
     }
 
-    const params = new URLSearchParams({
-      name: String(name).trim(),
-      email: String(email).trim(),
-      inquiryType: String(inquiryType || "Individuals").trim(),
-      interest: String(interest || "General").trim(),
-      message: String(message || "").trim(),
+    const country = getCountry(details.country.trim());
+    const phone = `${country?.dial ?? ""} ${details.phone.trim()}`.trim();
+    const saved = await appendInquiryRow({
+      name: details.name.trim().replace(/\s+/g, " "),
+      email: details.email.trim(),
+      inquiryType: details.inquiryType,
+      company: details.inquiryType === "Businesses" ? details.company.trim().replace(/\s+/g, " ") : "",
+      country: details.country.trim(),
+      phone: phone.startsWith("'") ? phone : `'${phone}`,
+      message: details.message.trim(),
       source: "home_inquiry_form",
-      timestamp: new Date().toLocaleString("en-IN", {
-        timeZone: "Asia/Kolkata",
-      }),
-      ...(process.env.INQUIRY_SPREADSHEET_ID
-        ? { sheet_id: process.env.INQUIRY_SPREADSHEET_ID.trim() }
-        : {}),
     });
 
-    // Send to Google Apps Script
-    const response = await fetch(`${scriptUrl}?${params.toString()}`, {
-      method: "GET",
-      redirect: "follow",
-    });
-
-    if (!response.ok) {
-      console.error(
-        "Failed to send lead to Google Sheets:",
-        response.status,
-        response.statusText
-      );
+    if (!saved.ok) {
+      console.error("Home inquiry sheet request failed:", saved.error);
+      return NextResponse.json({ error: saved.error }, { status: 502 });
     }
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Inquiry API Error:", error);
-    return NextResponse.json(
-      { error: error?.message || "Internal Server Error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Something went wrong. Please try again." }, { status: 500 });
   }
 }

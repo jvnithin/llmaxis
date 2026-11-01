@@ -1,157 +1,281 @@
 "use client";
 
-import { useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
+import Icon from "@/components/home/Icon";
 import { event as trackFbEvent } from "@/lib/fpixel";
-
-const APPS_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbzi_lBi9iz_5rd2XM2FZnKIasIsoGoJmJT_6_LYGfyU7fkGalqiKkFlEvkSjQGXFCHldw/exec";
+import {
+  countries,
+  getCountry,
+  mobileLength,
+  mobileLengthLabel,
+  sanitizeNationalNumber,
+} from "@/lib/countries";
+import {
+  HIRE_ROLES,
+  OTHER_HIRE_ROLE,
+  emptyHireForm,
+  validateHireForm,
+  type HireErrors,
+  type HireForm,
+} from "@/lib/hireForm";
+import "./hire.css";
 
 export default function HirePage() {
-  const [form, setForm] = useState({
-    company: "",
-    email: "",
-    interest: "AI Engineer",
-  });
-
+  const [form, setForm] = useState<HireForm>(emptyHireForm);
+  const [errors, setErrors] = useState<HireErrors>({});
   const [loading, setLoading] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
+  const customInterestRef = useRef<HTMLInputElement>(null);
+  const selectedCountry = getCountry(form.country);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-    if (error) setError("");
-  };
+  useEffect(() => {
+    if (form.interest === OTHER_HIRE_ROLE) customInterestRef.current?.focus();
+  }, [form.interest]);
 
- const handleSubmit = async () => {
-  if (!form.company || !form.email) {
-    setError("Please fill in all required fields.");
-    return;
-  }
-
-  setLoading(true);
-  setError("");
-
-  const params = new URLSearchParams({
-    source: "hire",
-    company: form.company,
-    email: form.email,
-    interest: form.interest,
-  });
-
-  try {
-    const res = await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
-
-    if (!res.ok) throw new Error("Request failed");
-
-    setSubmitted(true);
-    trackFbEvent("Lead", {
-      content_name: form.interest || "Hire Talent",
-      source: "hire_talent_form",
+  function update(next: HireForm) {
+    setForm(next);
+    setError("");
+    setErrors((current) => {
+      const checked = validateHireForm(next);
+      const updated = { ...current };
+      (Object.keys(current) as (keyof HireForm)[]).forEach((field) => {
+        if (current[field]) updated[field] = checked[field];
+      });
+      return updated;
     });
-    setForm({ company: "", email: "", interest: "AI Engineer" });
-
-  } catch (err) {
-    console.error(err);
-    setError("Submission failed. Please try again.");
-  } finally {
-    setLoading(false);
   }
-};
+
+  function updateCountry(name: string) {
+    const country = getCountry(name);
+    update({
+      ...form,
+      country: name,
+      phone: country ? sanitizeNationalNumber(form.phone, country) : "",
+    });
+  }
+
+  function updatePhone(raw: string) {
+    if (!selectedCountry) {
+      setErrors((current) => ({
+        ...current,
+        country: "Select a country code.",
+        phone: "Select a country code first.",
+      }));
+      return;
+    }
+    update({ ...form, phone: sanitizeNationalNumber(raw, selectedCountry) });
+  }
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const nextErrors = validateHireForm(form);
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
+
+    const interest =
+      form.interest === OTHER_HIRE_ROLE
+        ? form.customInterest.trim().replace(/\s+/g, " ")
+        : form.interest;
+
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch("/api/hire", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const payload = await response.json().catch(() => null);
+      if (!response.ok) {
+        if (payload?.fields) setErrors(payload.fields);
+        throw new Error(typeof payload?.error === "string" ? payload.error : "Request failed");
+      }
+
+      trackFbEvent("Lead", {
+        content_name: interest || "Hire Talent",
+        source: "hire_talent_form",
+      });
+      setForm(emptyHireForm);
+      setErrors({});
+    } catch (err) {
+      console.error(err);
+      const message = err instanceof Error ? err.message : "";
+      setError(
+        message && message !== "Request failed"
+          ? message
+          : "Submission failed. Please try again.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
-    <section className="min-h-screen bg-[#F7F8FC] flex items-center justify-center px-4 md:px-6 py-16">
-      <div className="bg-white rounded-3xl p-6 md:p-10 max-w-5xl w-full shadow-sm grid md:grid-cols-2 gap-4 md:gap-10">
-
-        {/* LEFT */}
-        <div className="flex flex-col justify-center">
-          <h2 className="text-2xl md:text-3xl font-bold text-[#0F172A] leading-tight">
-            Hire Industry-Ready{" "}
-            <span className="bg-gradient-to-r from-purple-600 to-indigo-600 text-transparent bg-clip-text">
-              AI Talent
-            </span>
-          </h2>
-
-          <p className="text-gray-500 mt-3 text-sm md:text-base leading-relaxed">
-            Access a pre-vetted pool of AI engineers trained on real-world projects.
-          </p>
-
-          <div className="mt-5 flex gap-3 flex-wrap">
-            <button className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-5 py-2 rounded-full text-sm">
+    <section className="hire-page">
+      <div className="hire-grid" aria-hidden="true" />
+      <div className="hire-shell">
+        <div className="hire-copy">
+          <p className="hire-kicker">Hire talent</p>
+          <h1>
+            Hire Industry-Ready <span className="hire-accent">AI Talent</span>
+          </h1>
+          <p>Access a pre-vetted pool of AI engineers trained on real-world projects.</p>
+          {/* <div className="hire-actions">
+            <button
+              type="button"
+              className="hire-button hire-button-primary"
+              onClick={() => document.getElementById("hire-name")?.focus()}
+            >
               Book Call
             </button>
-            <button className="border px-5 py-2 rounded-full text-sm">
+            <button
+              type="button"
+              className="hire-button hire-button-secondary"
+              onClick={() => document.getElementById("hiring-interest")?.focus()}
+            >
               View Skills
             </button>
-          </div>
+          </div> */}
         </div>
 
-        {/* RIGHT FORM */}
-        {submitted ? (
-          <div className="flex flex-col items-center justify-center p-6 bg-green-50 border border-green-200 rounded-2xl text-green-700 text-center">
-            <p className="text-xl font-semibold">🎉 Request received!</p>
-            <p className="text-sm mt-2">Our team will reach out to you shortly.</p>
-            <button
-              onClick={() => setSubmitted(false)}
-              className="mt-4 text-sm underline text-green-600 hover:text-green-800 transition"
-            >
-              Submit another request
-            </button>
-          </div>
-        ) : (
-          <div className="space-y-4">
+        <form className="hire-form" onSubmit={handleSubmit} noValidate>
+            <label>
+              <span>Name</span>
+              <input
+                id="hire-name"
+                name="name"
+                type="text"
+                placeholder="Your full name"
+                autoComplete="name"
+                maxLength={80}
+                value={form.name}
+                aria-invalid={Boolean(errors.name)}
+                onChange={(event) => update({ ...form, name: event.target.value })}
+              />
+              {errors.name ? <small>{errors.name}</small> : null}
+            </label>
 
-            <input
-              name="company"
-              value={form.company}
-              onChange={handleChange}
-              className="w-full border border-gray-300 p-3 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-              placeholder="Company Name *"
-            />
+            <label>
+              <span>Company name</span>
+              <input
+                name="company"
+                type="text"
+                placeholder="Your company name"
+                autoComplete="organization"
+                maxLength={120}
+                value={form.company}
+                aria-invalid={Boolean(errors.company)}
+                onChange={(event) => update({ ...form, company: event.target.value })}
+              />
+              {errors.company ? <small>{errors.company}</small> : null}
+            </label>
 
-            <input
-              name="email"
-              type="email"
-              value={form.email}
-              onChange={handleChange}
-              className="w-full border border-gray-300 p-3 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-              placeholder="Work Email *"
-            />
+            <label>
+              <span>Work email</span>
+              <input
+                name="email"
+                type="email"
+                placeholder="name@company.com"
+                autoComplete="email"
+                maxLength={120}
+                value={form.email}
+                aria-invalid={Boolean(errors.email)}
+                onChange={(event) => update({ ...form, email: event.target.value })}
+              />
+              {errors.email ? <small>{errors.email}</small> : null}
+            </label>
 
-            <div>
-              <label htmlFor="hiring-interest" className="text-xs text-gray-500">
-                Hiring Interest
+            <div className="hire-row">
+              <label>
+                <span>Country code</span>
+                <select
+                  name="country"
+                  value={form.country}
+                  autoComplete="country-name"
+                  aria-invalid={Boolean(errors.country)}
+                  onChange={(event) => updateCountry(event.target.value)}
+                >
+                  <option value="">Select country code</option>
+                  {countries.map((country) => (
+                    <option key={country.code} value={country.name}>
+                      {country.name} {country.dial}
+                    </option>
+                  ))}
+                </select>
+                {errors.country ? <small>{errors.country}</small> : null}
               </label>
+
+              <label>
+                <span>Mobile number</span>
+                <span className="hire-phone">
+                  <span className={selectedCountry ? "hire-dial" : "hire-dial is-empty"}>
+                    {selectedCountry?.dial ?? "Code"}
+                  </span>
+                  <input
+                    name="tel"
+                    type="tel"
+                    inputMode="numeric"
+                    autoComplete="tel-national"
+                    placeholder={
+                      selectedCountry ? mobileLengthLabel(selectedCountry) : "Select a country code first"
+                    }
+                    maxLength={selectedCountry ? mobileLength(selectedCountry)[1] : 15}
+                    value={form.phone}
+                    disabled={!selectedCountry}
+                    aria-invalid={Boolean(errors.phone)}
+                    onChange={(event) => updatePhone(event.target.value)}
+                  />
+                </span>
+                {errors.phone ? <small>{errors.phone}</small> : null}
+              </label>
+            </div>
+
+            <label>
+              <span>Hiring interest</span>
               <select
                 id="hiring-interest"
                 name="interest"
                 value={form.interest}
-                onChange={handleChange}
-                className="w-full border border-gray-300 p-3 rounded-lg mt-1 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                onChange={(event) =>
+                  update({
+                    ...form,
+                    interest: event.target.value,
+                    customInterest: event.target.value === OTHER_HIRE_ROLE ? form.customInterest : "",
+                  })
+                }
               >
-                <option>AI Engineer</option>
-                <option>Full Stack Developer</option>
-                <option>Data Scientist</option>
+                {HIRE_ROLES.map((role) => (
+                  <option key={role} value={role}>
+                    {role}
+                  </option>
+                ))}
               </select>
-            </div>
+            </label>
 
-            {error && (
-              <p className="text-red-500 text-sm font-medium">{error}</p>
-            )}
+            {form.interest === OTHER_HIRE_ROLE ? (
+              <label>
+                <span>Your role</span>
+                <input
+                  ref={customInterestRef}
+                  name="customInterest"
+                  type="text"
+                  placeholder="Enter the role you want to hire"
+                  maxLength={80}
+                  value={form.customInterest}
+                  aria-invalid={Boolean(errors.customInterest)}
+                  onChange={(event) => update({ ...form, customInterest: event.target.value })}
+                />
+                {errors.customInterest ? <small>{errors.customInterest}</small> : null}
+              </label>
+            ) : null}
 
-            <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={loading}
-              className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 rounded-lg text-sm font-medium hover:opacity-90 transition disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {loading ? "Submitting..." : "Submit Request"}
+            {error ? <p className="hire-error">{error}</p> : null}
+
+            <button className="hire-submit" type="submit" disabled={loading}>
+              {loading ? "Submitting..." : <>Submit Request <Icon name="arrow" size={18} /></>}
             </button>
-
-          </div>
-        )}
-
+          </form>
       </div>
     </section>
   );

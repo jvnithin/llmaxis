@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import Image from "next/image";
 import Icon, { IconName } from "@/components/home/Icon";
 import Navbar from "@/components/layout/Navbar";
@@ -65,15 +64,15 @@ const testimonials = [
   {
     quote:
       "The projects made complex AI concepts much easier to understand and apply. My practical skills and confidence working with modern GenAI tools and workflows grew.",
-    name: "Sarah Miller",
-    role: "Data Science Learner",
+    name: "Suman",
+    role: "Data Scientist",
     initials: "SM",
   },
   {
     quote:
       "I really enjoyed the balance between concepts, hands-on labs, and real-world AI applications. It helped me turn what I learned into projects I could actually showcase.",
-    name: "David Chen",
-    role: "AI Engineer in Training",
+    name: "Nandhini",
+    role: "AI Engineer",
     initials: "DC",
   },
 ];
@@ -186,7 +185,7 @@ export default function ProgramsPage() {
                 <span>guided weeks</span>
               </div>
               <div>
-                <strong>06</strong>
+                <strong>12</strong>
                 <span>portfolio builds</span>
               </div>
               <div>
@@ -265,54 +264,173 @@ export default function ProgramsPage() {
         <section className="trainer-section section-pad" id="trainer">
           <div className="section-container">
             <div className="trainer-heading reveal">
-              <p className="eyebrow">Learn from experience</p>
-              <h2>Build with confidence.</h2>
+              <p className="eyebrow">Trainer&apos;s Profile</p>
+              <h2>Learn with an industry practitioner.</h2>
               <p>
-                Learn from a practitioner who brings real-world experience in
-                AI, data, cloud, and business technology into every session.
+                Learn from an experienced leader who brings deep expertise in
+                Generative AI, Agentic AI, Cloud, and Enterprise Architecture into every session.
               </p>
             </div>
 
             <article className="trainer-card reveal">
-              <div className="trainer-image">
-                <Image
-                  src="/assets/program-trainer.jpg"
-                  alt="AI program trainer in a modern office"
-                  width={600}
-                  height={530}
-                  className="w-full h-full object-cover"
-                  priority
-                />
-                <span>Program lead</span>
+              {/* TOP HEADER: Title & Tagline */}
+              <div className="trainer-card-topbar">
+                <h3 className="trainer-card-title">Trainer&apos;s Profile</h3>
+                <div className="trainer-tagline-badge">
+                  <Icon name="spark" size={16} />
+                  <span>AI Practitioner, Trainer, Entrepreneur, Leadership Coach &amp; Trusted Advisor</span>
+                </div>
               </div>
 
-              <div className="trainer-copy">
-                <p className="eyebrow">Your trainer</p>
-                <h3>Learn with an industry practitioner.</h3>
-                <p>
-                  Sessions connect core concepts with the decisions, tools, and
-                  delivery patterns used to build useful AI products in the real
-                  world.
-                </p>
+              {/* MAIN CONTENT GRID */}
+              <div className="trainer-main-grid">
+                {/* TOP LEFT: Career Experience & Metrics */}
+                <div className="trainer-experience-block">
+                  <div className="trainer-roles-list">
+                    <div className="trainer-role-item">
+                      <div className="trainer-role-logo-wrap">
+                        <Image
+                          src="/logos/clients/amazon_a.svg"
+                          alt="Amazon"
+                          width={32}
+                          height={32}
+                          className="object-contain"
+                        />
+                      </div>
+                      <div className="trainer-role-details">
+                        <h4 className="trainer-role-title">Senior Software Engineer</h4>
+                        <p className="trainer-role-company">Amazon</p>
+                        <span className="trainer-role-dates">June 2022 – Feb 2024</span>
+                      </div>
+                    </div>
 
-                <ul>
-                  <li>
-                    <Icon name="check" size={17} /> Live guidance and project
-                    feedback
-                  </li>
-                  <li>
-                    <Icon name="check" size={17} /> Applied AI, cloud, and data
-                    experience
-                  </li>
-                  <li>
-                    <Icon name="check" size={17} /> Career and portfolio
-                    perspective
-                  </li>
-                </ul>
+                    <div className="trainer-role-item">
+                      <div className="trainer-role-logo-wrap">
+                        <Image
+                          src="/logos/clients/microsoft_icon.svg"
+                          alt="Microsoft"
+                          width={30}
+                          height={30}
+                          className="object-contain"
+                        />
+                      </div>
+                      <div className="trainer-role-details">
+                        <h4 className="trainer-role-title">Tech Lead</h4>
+                        <p className="trainer-role-company">Microsoft</p>
+                        <span className="trainer-role-dates">Aug 2017 – Feb 2019</span>
+                      </div>
+                    </div>
+                  </div>
 
-                <a className="text-button" href="#enroll">
-                  Talk to a mentor <Icon name="arrow" size={17} />
-                </a>
+                  <div className="trainer-stat-pill">
+                    <Icon name="spark" size={17} />
+                    <span>Trained <strong>3,000+</strong> professionals &amp; students across the Globe</span>
+                  </div>
+                </div>
+
+                {/* TOP RIGHT: Trainer Portrait & Identity */}
+                <div className="trainer-portrait-block">
+                  <div className="trainer-avatar-container">
+                    <div className="trainer-aura-ring trainer-aura-ring-1" aria-hidden="true" />
+                    <div className="trainer-aura-ring trainer-aura-ring-2" aria-hidden="true" />
+                    <div className="trainer-avatar-img-wrap">
+                      <Image
+                        src="/Ganesh.jpg"
+                        alt="Ganesh Adabala - Founder & Lead Trainer"
+                        width={180}
+                        height={180}
+                        className="trainer-avatar-img"
+                        priority
+                      />
+                    </div>
+                  </div>
+                  <div className="trainer-identity">
+                    <h3 className="trainer-name">Ganesh Adabala</h3>
+                    <p className="trainer-title-sub">
+                      Subject Matter Expert at{" "}
+                      <a
+                        href={process.env.NEXT_PUBLIC_LLM_AXIS_LINKEDIN_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        LLM AXIS
+                      </a>
+                    </p>
+                    <span className="trainer-exp-badge">16+ Yrs of Global Experience</span>
+                  </div>
+                </div>
+
+                {/* BOTTOM LEFT: Detailed Bio */}
+                <div className="trainer-bio-block">
+                  <p>
+                    <strong>Ganesh Adabala</strong> is a seasoned <strong>Data &amp; AI Trainer</strong> with{" "}
+                    <strong>15+ years</strong> of global technology experience across companies such as{" "}
+                    <strong>Microsoft, Amazon, Eurofins, and Neudesic</strong>. He specializes in helping organizations and
+                    professionals adopt{" "}
+                    <strong>Generative AI, Agentic AI, Data Analytics, and Cloud technologies</strong> to build
+                    business-ready solutions that create <strong>measurable impact</strong>.
+                  </p>
+                  <p>
+                    Ganesh blends <strong>practitioner expertise + hands-on teaching</strong> to make complex AI concepts
+                    practical, accessible, and immediately applicable. His delivery style emphasizes{" "}
+                    <strong>real business use cases</strong>, <strong>workflow integration</strong>,{" "}
+                    <strong>tool-based execution</strong>, and <strong>ROI-driven adoption</strong>.
+                  </p>
+
+                  {/* <div className="trainer-action-area">
+                    <button
+                      type="button"
+                      className="text-button trainer-mentor-btn"
+                      onClick={() => setEnrollModalOpen(true)}
+                    >
+                      Talk to a mentor <Icon name="arrow" size={16} />
+                    </button>
+                  </div> */}
+                </div>
+
+                {/* BOTTOM RIGHT: Trained Across Logos */}
+                <div className="trainer-clients-block">
+                  <h4 className="trainer-clients-heading">Trained across:</h4>
+                  <div className="trainer-clients-stack">
+                    <div className="trainer-client-pill">
+                      <Image
+                        src="/logos/clients/deloitte_clean.png"
+                        alt="Deloitte"
+                        width={130}
+                        height={32}
+                        className="trainer-client-img"
+                      />
+                    </div>
+    
+                    {/* <div className="trainer-client-pill">
+                      <Image
+                        src="/logos/clients/centric.svg"
+                        alt="Centric"
+                        width={130}
+                        height={32}
+                        className="trainer-client-img"
+                      />
+                    </div> */}
+                    <div className="trainer-client-pill">
+                      <Image
+                        src="/logos/clients/accenture_clean.png"
+                        alt="Accenture"
+                        width={136}
+                        height={36}
+                        className="trainer-client-img"
+                      />
+                    </div>
+                    <div className="trainer-client-pill trainer-client-pill-aicte">
+                      <Image
+                        src="/logos/clients/aicte_clean.png"
+                        alt="AICTE & AICTE IDEA Lab"
+                        width={140}
+                        height={54}
+                        className="trainer-client-img"
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
             </article>
           </div>
@@ -374,7 +492,7 @@ export default function ProgramsPage() {
                   className="button button-primary"
                   onClick={() => setEnrollModalOpen(true)}
                 >
-                  Explore enrollment <Icon name="arrow" size={18} />
+                  Enroll Now <Icon name="arrow" size={18} />
                 </button>
               </div>
 

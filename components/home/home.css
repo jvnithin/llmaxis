@@ -676,6 +676,17 @@
   transform: rotate(0deg);
 }
 
+a.service-card,
+button.service-card {
+  display: block;
+  width: 100%;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
 /* Why Section */
 .why {
   position: relative;
@@ -865,6 +876,7 @@
   font-family: Georgia, serif;
   font-size: 260px;
   line-height: 1;
+  pointer-events: none;
 }
 
 .testimonial-track {
@@ -916,8 +928,9 @@
 
 .carousel-controls {
   position: absolute;
-  right: 6%;
+  right: max(6%, 92px);
   bottom: 64px;
+  z-index: 2;
   display: flex;
   align-items: center;
   gap: 13px;
@@ -928,6 +941,7 @@
   width: 42px;
   height: 42px;
   place-items: center;
+  cursor: pointer;
   border: 1px solid var(--line);
   border-radius: 50%;
   color: #4e546c;
@@ -1020,7 +1034,7 @@
   border: 1px solid rgba(35, 40, 74, 0.09);
   border-radius: 11px;
   background: rgba(73, 78, 112, 0.06);
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
 }
 
 .form-tabs button {
@@ -1029,7 +1043,7 @@
   border-radius: 8px;
   color: #686f88;
   background: transparent;
-  font-size: 10px;
+  font-size: 13px;
   font-weight: 700;
   transition: color 200ms ease, background 200ms ease;
 }
@@ -1062,6 +1076,62 @@
   color: #4e546b;
   font-size: 10px;
   font-weight: 700;
+}
+
+.form-shell label small,
+.form-error {
+  color: #d92d20;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.form-error {
+  margin: 0;
+}
+
+.form-shell input[aria-invalid="true"],
+.form-shell select[aria-invalid="true"],
+.form-shell textarea[aria-invalid="true"] {
+  border-color: #d92d20;
+}
+
+.form-shell input:disabled {
+  color: #8a90a5;
+  background: #f4f5fa;
+  cursor: not-allowed;
+}
+
+.inquiry-phone {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.inquiry-phone input {
+  width: auto;
+  flex: 1;
+  min-width: 0;
+}
+
+.inquiry-dial {
+  display: grid;
+  min-width: 72px;
+  height: 49px;
+  place-items: center;
+  padding: 0 10px;
+  border: 1px solid rgba(128, 109, 255, 0.35);
+  border-radius: 10px;
+  background: rgba(128, 109, 255, 0.1);
+  color: #5b46d6;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.inquiry-dial.is-empty {
+  border-color: rgba(35, 40, 74, 0.12);
+  background: rgba(249, 250, 255, 0.9);
+  color: #9298aa;
 }
 
 .form-shell input,
@@ -1351,7 +1421,7 @@
   }
   .form-tabs {
     overflow-x: auto;
-    grid-template-columns: repeat(3, minmax(105px, 1fr));
+    grid-template-columns: repeat(2, minmax(120px, 1fr));
   }
   .form-grid {
     grid-template-columns: 1fr;

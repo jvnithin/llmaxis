@@ -33,6 +33,9 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# local editor config that can contain access tokens
+.cursor/mcp.json
+
 # vercel
 .vercel
 

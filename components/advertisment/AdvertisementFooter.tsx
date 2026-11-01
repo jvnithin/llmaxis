@@ -149,7 +149,7 @@ export default function AdvertisementFooter() {
                 <li><Link href="/learning" className="hover:text-purple-600 transition">About Us</Link></li>
                 <li><Link href="/hire" className="hover:text-purple-600 transition">Success Stories</Link></li>
                 <li><Link href="/contact" className="hover:text-purple-600 transition">Contact</Link></li>
-                <li><Link href="/refund-policy" className="hover:text-purple-600 transition">Privacy Policy</Link></li>
+                <li><Link href="/privacy-policy" className="hover:text-purple-600 transition">Privacy Policy</Link></li>
                 <li><Link href="/terms-and-conditions" className="hover:text-purple-600 transition">Terms of Service</Link></li>
               </ul>
             </div>

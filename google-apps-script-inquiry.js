@@ -21,6 +21,14 @@
  * 12. Paste it in your .env file:
  *     INQUIRY_APPS_SCRIPT_URL=<YOUR_WEB_APP_URL>
  *     NEXT_PUBLIC_INQUIRY_APPS_SCRIPT_URL=<YOUR_WEB_APP_URL>
+ *
+ * Home inquiry rows store:
+ * Timestamp, Inquiry Type, Full Name, Email, Company, Country, Phone, Message, Interest, Source.
+ * Individuals leave Company blank. Businesses fill Company and use a company email.
+ * AI Community signups still use the Interest column.
+ *
+ * After pasting this file, deploy a new version with Who has access set to Anyone.
+ * The For Business cards use google-apps-script-business.js. Do not paste that file here.
  */
 
 function doGet(e) {
@@ -58,58 +66,46 @@ function handleRequest(e) {
       }
     }
 
-    // Determine target spreadsheet
-    var sheet;
-    if (params.sheet_id) {
-      sheet = SpreadsheetApp.openById(params.sheet_id).getActiveSheet();
-    } else {
-      sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-    }
+    var spreadsheet = params.sheet_id
+      ? SpreadsheetApp.openById(params.sheet_id)
+      : SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = spreadsheet.getActiveSheet();
+    var headers = [
+      "Timestamp (IST)",
+      "Inquiry Type",
+      "Full Name",
+      "Email",
+      "Company",
+      "Country",
+      "Phone",
+      "Message",
+      "Interest",
+      "Source"
+    ];
+    ensureHeaders(sheet, headers);
 
-    // Auto-create headers if sheet is empty
-    if (sheet.getLastRow() === 0) {
-      sheet.appendRow([
-        "Timestamp (IST)",
-        "Full Name",
-        "Email",
-        "Inquiry Type",
-        "Interest Area",
-        "Message",
-        "Source"
-      ]);
-
-      // Style header row
-      var headerRange = sheet.getRange("A1:G1");
-      headerRange.setFontWeight("bold");
-      headerRange.setBackground("#4F46E5");
-      headerRange.setFontColor("#FFFFFF");
-      headerRange.setHorizontalAlignment("center");
-      sheet.setFrozenRows(1);
-    }
-
-    // Extract values with sensible fallbacks
     var timestamp = params.timestamp || new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
-    var name = params.name || "N/A";
-    var email = params.email || "N/A";
-    var inquiryType = params.inquiryType || params.inquiry_type || "Individuals";
-    var interest = params.interest || "General";
-    var message = params.message || "";
-    var source = params.source || "home_inquiry_form";
+    var phone = params.phone ? String(params.phone) : "";
+    if (phone && phone.charAt(0) !== "'") phone = "'" + phone;
 
-    // Append lead row
-    sheet.appendRow([
-      timestamp,
-      name,
-      email,
-      inquiryType,
-      interest,
-      message,
-      source
-    ]);
+    appendByHeader(sheet, {
+      "Timestamp (IST)": timestamp,
+      "Inquiry Type": params.inquiryType || params.inquiry_type || "Individuals",
+      "Full Name": params.name || "",
+      "Email": params.email || "",
+      "Company": params.company || "",
+      "Country": params.country || "",
+      "Phone": phone,
+      "Message": params.message || "",
+      "Interest": params.interest || "",
+      "Interest Area": params.interest || "",
+      "Source": params.source || "home_inquiry_form"
+    });
 
-    // Format latest row
     var lastRow = sheet.getLastRow();
     sheet.getRange(lastRow, 1).setHorizontalAlignment("center");
+    var phoneColumn = headerIndex(sheet, "Phone");
+    if (phoneColumn > 0) sheet.getRange(lastRow, phoneColumn).setNumberFormat("@");
 
     var result = {
       status: "success",
@@ -134,4 +130,62 @@ function handleRequest(e) {
   } finally {
     lock.releaseLock();
   }
+}
+
+function ensureHeaders(sheet, headers) {
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(headers);
+    var created = sheet.getRange(1, 1, 1, headers.length);
+    created.setFontWeight("bold");
+    created.setBackground("#4F46E5");
+    created.setFontColor("#FFFFFF");
+    created.setHorizontalAlignment("center");
+    sheet.setFrozenRows(1);
+    var createdPhone = headerIndex(sheet, "Phone");
+    if (createdPhone > 0) sheet.getRange(1, createdPhone, sheet.getMaxRows(), 1).setNumberFormat("@");
+    return;
+  }
+
+  var width = Math.max(sheet.getLastColumn(), 1);
+  var current = sheet.getRange(1, 1, 1, width).getValues()[0];
+  var lastFilled = 0;
+  var missing = [];
+  for (var i = 0; i < current.length; i++) {
+    if (String(current[i] || "").trim()) lastFilled = i + 1;
+  }
+  for (var h = 0; h < headers.length; h++) {
+    if (current.indexOf(headers[h]) === -1) missing.push(headers[h]);
+  }
+  if (!missing.length) return;
+
+  for (var m = 0; m < missing.length; m++) {
+    var cell = sheet.getRange(1, lastFilled + 1 + m);
+    cell.setValue(missing[m]);
+    cell.setFontWeight("bold");
+    cell.setBackground("#4F46E5");
+    cell.setFontColor("#FFFFFF");
+    cell.setHorizontalAlignment("center");
+  }
+  var phoneColumn = headerIndex(sheet, "Phone");
+  if (phoneColumn > 0) sheet.getRange(1, phoneColumn, sheet.getMaxRows(), 1).setNumberFormat("@");
+}
+
+function headerIndex(sheet, name) {
+  var width = Math.max(sheet.getLastColumn(), 1);
+  var current = sheet.getRange(1, 1, 1, width).getValues()[0];
+  for (var i = 0; i < current.length; i++) {
+    if (String(current[i]) === name) return i + 1;
+  }
+  return 0;
+}
+
+function appendByHeader(sheet, values) {
+  var width = Math.max(sheet.getLastColumn(), 1);
+  var current = sheet.getRange(1, 1, 1, width).getValues()[0];
+  var row = [];
+  for (var i = 0; i < current.length; i++) {
+    var key = String(current[i] || "");
+    row.push(key && Object.prototype.hasOwnProperty.call(values, key) ? values[key] : "");
+  }
+  sheet.appendRow(row);
 }

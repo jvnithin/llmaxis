@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
+import { eventCurrency, eventPrice, formatEventPrice } from "@/lib/eventPrice";
 import { saveEventLeadToGoogleSheet } from "@/lib/googleSheets";
 import { sendMetaServerEvent } from "@/lib/metaConversions";
 
@@ -70,7 +71,7 @@ export async function POST(req: Request) {
       paymentStatus: "Paid",
       paymentId,
       orderId,
-      amount: amount || `₹${process.env.EVENT_PRICE_INR || 499}`,
+      amount: amount || formatEventPrice(),
       event: selectedEvent,
     });
 
@@ -81,8 +82,8 @@ export async function POST(req: Request) {
       phone,
       name,
       orderId,
-      value: Number(process.env.EVENT_PRICE) || 1,
-      currency: process.env.EVENT_CURRENCY || "USD",
+      value: eventPrice(),
+      currency: eventCurrency(),
     }).catch(() => {});
 
     return Response.json({

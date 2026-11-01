@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { formatEventPrice } from "@/lib/eventPrice";
 import { saveEventLeadToGoogleSheet } from "@/lib/googleSheets";
 
 export async function POST(req: Request) {
@@ -13,7 +14,7 @@ export async function POST(req: Request) {
         phone: phone || "N/A",
         paymentStatus: "Cancelled",
         orderId,
-        amount: process.env.EVENT_CURRENCY === "USD" ? `$${process.env.EVENT_PRICE || 1}` : `₹${process.env.EVENT_PRICE || 499}`,
+        amount: formatEventPrice(),
       });
     }
 

@@ -1,6 +1,8 @@
 import React from "react";
+import Link from "next/link";
 import Icon from "./Icon";
 import NeuralCanvas from "./NeuralCanvas";
+import PartnerWithUsButton from "./partnership/PartnerWithUsButton";
 
 export default function HeroSection() {
   return (
@@ -28,12 +30,10 @@ export default function HeroSection() {
             opportunities in the AI-powered economy.
           </p>
           <div className="hero-actions">
-            <a className="button button-primary" href="#programs">
+            <Link className="button button-primary" href="/learning">
               Explore AI programs <Icon name="arrow" size={19} />
-            </a>
-            <a className="button button-secondary" href="#business">
-              Partner with us
-            </a>
+            </Link>
+            <PartnerWithUsButton />
           </div>
           <div className="hero-proof">
             <div className="proof-avatars" aria-hidden="true">

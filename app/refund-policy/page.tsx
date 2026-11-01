@@ -6,7 +6,7 @@ export const metadata = {
 
 export default function RefundPage() {
   return (
-    <div className="max-w-4xl mx-auto px-6 py-16 text-gray-800 text-sm leading-relaxed">
+    <div className="max-w-4xl mx-auto px-6 pt-36 pb-16 text-gray-800 text-sm leading-relaxed">
       <h1 className="text-3xl font-bold text-gray-900 mb-2">
         Refund &amp; Cancellation Policy
       </h1>
