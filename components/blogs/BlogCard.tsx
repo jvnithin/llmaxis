@@ -6,8 +6,11 @@ export default function BlogCard({ guide }: { guide: BlogGuide }) {
     <>
       <img className="blog-cover" src={encodeURI(guide.image)} alt="" />
       <div className="blog-card-body">
-        <h2>{guide.title}</h2>
-        <p>{guide.subtitle}</p>
+        {guide.kind === "article" && guide.category ? (
+          <p className="blog-card-category">{guide.category}</p>
+        ) : null}
+        <h2 className="blog-card-title">{guide.title}</h2>
+        <p className="blog-card-subtitle">{guide.subtitle}</p>
       </div>
     </>
   );

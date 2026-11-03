@@ -34,6 +34,15 @@
     #ffffff;
 }
 
+.programs-brochure-midpoint {
+  width: 100%;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
 .programs-page h1,
 .programs-page h2,
 .programs-page h3,
@@ -419,6 +428,14 @@
   background: linear-gradient(180deg, #fff, #fbfbff);
 }
 
+.program-audience.section-pad {
+  padding-bottom: 48px;
+}
+
+.program-curriculum.section-pad {
+  padding-top: 48px;
+}
+
 .program-section-heading {
   display: grid;
   align-items: end;
@@ -761,12 +778,23 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
+.trainer-role-logo-wrap.is-wide {
+  width: 96px;
+  padding: 8px 10px;
+}
+
 .trainer-role-logo-wrap img {
   max-width: 100%;
   max-height: 100%;
   width: auto;
   height: auto;
   object-fit: contain;
+}
+
+.trainer-role-logo-wrap.is-wide img {
+  width: 100%;
+  height: auto;
+  max-height: 28px;
 }
 
 .trainer-role-details {
@@ -988,46 +1016,61 @@
   margin: 0 0 2px 0;
 }
 
-.trainer-clients-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+.trainer-clients-box {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 6px 4px;
+  padding: 16px 14px;
+  border-radius: 18px;
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.03),
+    0 10px 28px rgba(70, 65, 120, 0.06);
 }
 
-.trainer-client-pill {
+.trainer-client-logo {
+  grid-column: span 2;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px 18px;
-  border-radius: 14px;
-  background: #ffffff;
-  border: 1px solid rgba(226, 232, 240, 0.95);
-  box-shadow: 0 2px 10px rgba(70, 65, 120, 0.04);
-  min-height: 50px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  min-height: 52px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  transition: background 160ms ease;
 }
 
-.trainer-client-pill:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 22px rgba(99, 102, 241, 0.1);
-  border-color: rgba(99, 102, 241, 0.25);
+.trainer-client-logo:nth-child(n + 4) {
+  grid-column: span 3;
 }
 
-.trainer-client-pill img {
-  max-height: 32px;
+.trainer-client-logo:hover {
+  background: rgba(248, 250, 255, 0.95);
+}
+
+.trainer-client-logo.is-tall {
+  min-height: 58px;
+}
+
+.trainer-client-logo img,
+.trainer-client-img {
+  max-height: 30px;
   max-width: 100%;
   width: auto;
   height: auto;
   object-fit: contain;
 }
 
-.trainer-client-pill-aicte {
-  min-height: 60px;
-  padding: 6px 16px;
+.trainer-client-logo.is-tall img,
+.trainer-client-logo.is-tall .trainer-client-img {
+  max-height: 42px;
 }
 
-.trainer-client-pill-aicte img {
+.trainer-client-logo.is-seal img,
+.trainer-client-logo.is-seal .trainer-client-img {
   max-height: 46px;
+  max-width: 46px;
+  border-radius: 50%;
 }
 
 .text-button {
@@ -1185,7 +1228,8 @@
 }
 
 .marquee-label {
-  margin: 95px 0 24px;
+  margin: 120px 0 24px;
+  padding-top: 8px;
   color: #d8dbea;
   font-family: 'Space Grotesk', sans-serif;
   font-size: 19px;
@@ -1207,17 +1251,31 @@
 
 .company-track {
   display: flex;
+  align-items: center;
   width: max-content;
-  animation: marquee 25s linear infinite;
+  animation: marquee 28s linear infinite;
 }
 
-.company-track span {
-  min-width: 230px;
-  color: rgba(255, 255, 255, 0.72);
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 26px;
-  font-weight: 700;
-  letter-spacing: -0.04em;
+.company-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  min-width: 168px;
+  height: 56px;
+  margin: 0 10px;
+  padding: 0 18px;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 8px 20px rgba(7, 8, 17, 0.18);
+}
+
+.company-logo-image {
+  display: block;
+  width: auto !important;
+  height: 28px !important;
+  max-width: 124px;
+  object-fit: contain;
 }
 
 /* Footer */
@@ -1337,6 +1395,8 @@ footer.programs-footer .footer-bottom div {
 @media (max-width: 780px) {
   .section-container { width: min(100% - 32px, 640px); }
   .section-pad { padding: 92px 0; }
+  .program-audience.section-pad { padding-bottom: 36px; }
+  .program-curriculum.section-pad { padding-top: 36px; }
   .nav-wrap { min-height: 58px; padding-left: 14px; }
   .menu-button { display: flex; margin-left: auto; }
   .nav-links {
@@ -1411,11 +1471,16 @@ footer.programs-footer .footer-bottom div {
   .trainer-experience-block { order: 2; }
   .trainer-bio-block { order: 3; padding-right: 0; }
   .trainer-clients-block { order: 4; }
-  .trainer-clients-stack { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-  .trainer-clients-stack .trainer-client-pill-aicte { grid-column: span 2; min-height: 56px; }
+  .trainer-clients-box {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .trainer-client-logo,
+  .trainer-client-logo:nth-child(n + 4) {
+    grid-column: span 1;
+  }
   .program-testimonials { grid-template-columns: 1fr; }
   .program-cta-panel { min-height: 650px; padding-top: 85px; }
-  .marquee-label { margin-top: 75px; }
+  .marquee-label { margin-top: 96px; padding-top: 8px; }
 }
 
 @media (max-width: 520px) {
@@ -1442,13 +1507,24 @@ footer.programs-footer .footer-bottom div {
   .trainer-card { padding: 24px 16px; border-radius: 20px; }
   .trainer-card-title { font-size: 25px; }
   .trainer-tagline-badge { font-size: 11.5px; padding: 6px 12px; }
-  .trainer-clients-stack { grid-template-columns: 1fr; }
-  .trainer-clients-stack .trainer-client-pill-aicte { grid-column: span 1; }
+  .trainer-clients-box {
+    grid-template-columns: 1fr;
+  }
   .program-testimonial { min-height: 350px; padding: 30px 24px; }
   .program-cta-panel { min-height: 700px; padding: 75px 22px 0; }
   .program-cta-panel > div:not(.cta-grid):not(.company-marquee) { flex-direction: column; }
-  .marquee-label { margin-top: 65px; }
-  .company-track span { min-width: 180px; font-size: 21px; }
+  .marquee-label { margin-top: 84px; padding-top: 8px; }
+  .company-logo {
+    min-width: 148px;
+    height: 50px;
+    margin: 0 8px;
+    padding: 0 14px;
+  }
+
+  .company-logo-image {
+    height: 24px !important;
+    max-width: 108px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

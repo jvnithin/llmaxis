@@ -15,23 +15,18 @@ const contactDetails: ContactDetail[] = [
     value: "LLM AXIS PRIVATE LIMITED",
   },
   {
-    label: "Registered Address",
-    value:
-      "Innov8 Mantri Commercio, Tower A, 5th Floor, Deeta, Bellandur, Bangalore, Bangalore South, Karnataka, India, 560103",
-  },
-  {
-    label: "Operational Address",
+    label: "Address",
     value:
       "Innov8 Mantri Commercio, Tower A, 5th Floor, Deeta, Bellandur, Bangalore, Bangalore South, Karnataka, India, 560103",
   },
   {
     label: "Telephone No",
-    value: ["8309782214", "6300205469"],
+    value: ["+91 8309782214", "+91 6300205469"],
     href: ["tel:8309782214", "tel:6300205469"],
   },
   {
     label: "E-Mail ID",
-    value: "Contact@llmaxis.in",
+    value: "team@llmaxis.in",
     href: "mailto:Contact@llmaxis.in",
   },
 ];
@@ -93,7 +88,13 @@ export default function ContactPage() {
 
   return (
     <main>
-      <section className="min-h-screen bg-[#F7F8FC] flex items-center justify-center px-4 md:px-6 py-16">
+      <section
+        className="min-h-screen flex items-center justify-center px-4 md:px-6 py-16"
+        style={{
+          background:
+            "radial-gradient(circle at 12% 18%, rgba(68, 187, 255, 0.1), transparent 24rem), radial-gradient(circle at 88% 12%, rgba(140, 84, 247, 0.14), transparent 28rem), linear-gradient(to bottom, #f8f9ff, #ffffff 72%)",
+        }}
+      >
         <div className="bg-white rounded-3xl p-6 md:p-10 max-w-5xl w-full shadow-sm grid md:grid-cols-2 gap-6 md:gap-10">
           
           
@@ -186,29 +187,28 @@ export default function ContactPage() {
             {/* Contact List */}
             <div className="space-y-4">
               {contactDetails.map((item, i) => (
-                <div key={i} className="flex justify-between items-start gap-4">
-                  {/* LABEL */}
-                  <p className="text-xs font-medium text-gray-500 w-[101%]">
-                    {item.label} :
+                <div
+                  key={i}
+                  className="grid grid-cols-[minmax(10.5rem,42%)_minmax(0,1fr)] gap-x-4 items-start"
+                >
+                  <p className="text-xs font-medium text-gray-500 whitespace-nowrap">
+                    {item.label}&nbsp;:
                   </p>
 
                   {/* VALUE */}
-                  <div className="w-[200%] text-left">
+                  <div className="min-w-0 text-left">
                     {Array.isArray(item.value) && Array.isArray(item.href) ? (
-                      <p className="text-sm font-medium text-gray-800">
+                      <div className="flex flex-col gap-1 text-sm font-medium text-gray-800">
                         {item.value.map((val, idx) => (
-                          <span key={idx}>
-                            <a
-                              href={(item.href as string[])[idx]}
-                              className="hover:underline"
-                            >
-                              {val}
-                            </a>
-                            {idx !== (item.value as string[]).length - 1 &&
-                              ", "}
-                          </span>
+                          <a
+                            key={idx}
+                            href={(item.href as string[])[idx]}
+                            className="whitespace-nowrap hover:underline"
+                          >
+                            {val}
+                          </a>
                         ))}
-                      </p>
+                      </div>
                     ) : item.href ? (
                       <a
                         href={item.href as string}

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import BlogsExplorer from "@/components/blogs/BlogsExplorer";
 import "@/components/blogs/blogs.css";
+import { getArticleCategories, getBlogGuides } from "@/lib/guides";
 
 export const metadata: Metadata = {
   title: "Guides, Roadmaps & Free Courses",
@@ -12,5 +14,9 @@ export const metadata: Metadata = {
 };
 
 export default function BlogsPage() {
-  return <BlogsExplorer />;
+  return (
+    <Suspense fallback={null}>
+      <BlogsExplorer guides={getBlogGuides()} articleCategories={getArticleCategories()} />
+    </Suspense>
+  );
 }

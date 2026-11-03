@@ -46,6 +46,11 @@
   top: 96px;
   max-height: calc(100vh - 120px);
   overflow: auto;
+  scroll-margin-top: 104px;
+}
+
+.guide-mobile-actions {
+  display: none;
 }
 
 .guide-toc {
@@ -414,5 +419,64 @@
 
   .guide-phone input {
     flex: 1;
+  }
+
+  .guide-aside {
+    scroll-margin-top: 92px;
+  }
+
+  .guide-mobile-actions {
+    display: block;
+    pointer-events: none;
+  }
+
+  .guide-mobile-counselling,
+  .guide-mobile-top {
+    pointer-events: auto;
+    position: fixed;
+    z-index: 45;
+    border: 0;
+    cursor: pointer;
+    box-shadow: 0 10px 28px rgba(19, 27, 46, 0.18);
+  }
+
+  /* Below the fixed navbar, top-right of the viewport. */
+  .guide-mobile-counselling {
+    top: 96px;
+    right: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 0 14px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #526dff 0%, #8c54f7 100%);
+    color: #fff;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  /* Above the WhatsApp FAB (bottom-right ~20px + 48px). */
+  .guide-mobile-top {
+    right: 20px;
+    bottom: 84px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    background: #131b2e;
+    color: #fff;
+  }
+
+  .guide-mobile-counselling:focus-visible,
+  .guide-mobile-top:focus-visible {
+    outline: 2px solid #630ed4;
+    outline-offset: 3px;
   }
 }

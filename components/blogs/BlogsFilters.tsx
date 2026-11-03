@@ -1,14 +1,19 @@
-import { BLOG_FILTERS, type BlogFilter } from "./data";
-
 type BlogsFiltersProps = {
-  active: BlogFilter;
-  onChange: (filter: BlogFilter) => void;
+  filters: readonly string[];
+  active: string;
+  onChange: (filter: string) => void;
+  label?: string;
 };
 
-export default function BlogsFilters({ active, onChange }: BlogsFiltersProps) {
+export default function BlogsFilters({
+  filters,
+  active,
+  onChange,
+  label = "Guide topics",
+}: BlogsFiltersProps) {
   return (
-    <div className="blogs-filters" role="tablist" aria-label="Guide topics">
-      {BLOG_FILTERS.map((filter) => {
+    <div className="blogs-filters" role="tablist" aria-label={label}>
+      {filters.map((filter) => {
         const selected = filter === active;
         return (
           <button

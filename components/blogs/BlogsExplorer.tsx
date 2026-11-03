@@ -1,29 +1,90 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import BlogsCta from "./BlogsCta";
 import BlogsFilters from "./BlogsFilters";
 import BlogsGrid from "./BlogsGrid";
 import BlogsHero from "./BlogsHero";
+import BlogsKindTabs from "./BlogsKindTabs";
 import BlogsLoadMore from "./BlogsLoadMore";
-import { BLOG_GUIDES, type BlogFilter } from "./data";
+import { BLOG_FILTERS, type BlogGuide, type BlogKind } from "./data";
 
-export default function BlogsExplorer() {
+const INITIAL_VISIBLE = 6;
+const ALL_ARTICLES = "All Articles";
+
+function kindFromTab(tab: string | null): BlogKind {
+  return tab?.toLowerCase() === "articles" ? "Articles" : "Roadmaps";
+}
+
+export default function BlogsExplorer({
+  guides: allGuides,
+  articleCategories,
+}: {
+  guides: BlogGuide[];
+  articleCategories: string[];
+}) {
+  const searchParams = useSearchParams();
+  const tab = searchParams.get("tab");
+  const initialKind = kindFromTab(tab);
+  const [kind, setKind] = useState<BlogKind>(initialKind);
   const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState<BlogFilter>("All Topics");
+  const [filter, setFilter] = useState<string>(
+    initialKind === "Articles" ? ALL_ARTICLES : "All Topics",
+  );
+  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE);
+
+  useEffect(() => {
+    setKind(kindFromTab(tab));
+  }, [tab]);
+
+  const counts = useMemo(
+    () => ({
+      Roadmaps: allGuides.filter((guide) => guide.kind === "roadmap").length,
+      Articles: allGuides.filter((guide) => guide.kind === "article").length,
+    }),
+    [allGuides],
+  );
+
+  const topicFilters = useMemo(() => {
+    if (kind === "Roadmaps") return BLOG_FILTERS;
+    return [ALL_ARTICLES, ...articleCategories];
+  }, [articleCategories, kind]);
+
+  useEffect(() => {
+    setFilter(kind === "Roadmaps" ? "All Topics" : ALL_ARTICLES);
+    setVisibleCount(INITIAL_VISIBLE);
+  }, [kind]);
 
   const guides = useMemo(() => {
     const needle = query.trim().toLowerCase();
-    return BLOG_GUIDES.filter((guide) => {
-      const matchesTopic = filter === "All Topics" || guide.topics.includes(filter);
-      if (!matchesTopic) return false;
+    const expectedKind = kind === "Roadmaps" ? "roadmap" : "article";
+
+    return allGuides.filter((guide) => {
+      if (guide.kind !== expectedKind) return false;
+
+      if (kind === "Roadmaps") {
+        const matchesTopic = filter === "All Topics" || guide.topics.includes(filter as (typeof BLOG_FILTERS)[number]);
+        if (!matchesTopic) return false;
+      } else {
+        const matchesCategory = filter === ALL_ARTICLES || guide.category === filter;
+        if (!matchesCategory) return false;
+      }
+
       if (!needle) return true;
-      const haystack = [guide.title, guide.subtitle, ...guide.topics]
+      const haystack = [guide.title, guide.subtitle, guide.category ?? "", ...guide.topics]
         .join(" ")
         .toLowerCase();
       return haystack.includes(needle);
     });
-  }, [filter, query]);
+  }, [allGuides, filter, kind, query]);
+
+  useEffect(() => {
+    setVisibleCount(INITIAL_VISIBLE);
+  }, [filter, query, kind]);
+
+  const visibleGuides = guides.slice(0, visibleCount);
+  const hasMore = guides.length > visibleCount;
 
   return (
     <main className="blogs-page">
@@ -37,10 +98,18 @@ export default function BlogsExplorer() {
             document.getElementById("guides")?.scrollIntoView({ behavior: "smooth", block: "start" });
           }}
         />
-        <BlogsFilters active={filter} onChange={setFilter} />
+        <BlogsKindTabs active={kind} onChange={setKind} counts={counts} />
+        <BlogsFilters
+          filters={topicFilters}
+          active={filter}
+          onChange={setFilter}
+          label={kind === "Roadmaps" ? "Roadmap topics" : "Article categories"}
+        />
         <div className="blogs-results">
-          <BlogsGrid guides={guides} />
-          {guides.length > 0 ? <BlogsLoadMore /> : null}
+          <BlogsGrid guides={visibleGuides} emptyLabel={kind === "Roadmaps" ? "roadmaps" : "articles"} />
+          {hasMore ? (
+            <BlogsLoadMore onClick={() => setVisibleCount(guides.length)} />
+          ) : null}
         </div>
         <BlogsCta />
       </div>

@@ -6,6 +6,7 @@ import Icon, { IconName } from "@/components/home/Icon";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import BrochureModal from "@/components/learning/BroucherModal";
+import { ProjectsRoadmapSection } from "@/components/learning/projects-roadmap";
 import EventRegisterModal from "@/components/events/EventRegisterModal";
 import "@/components/learning/programs.css";
 
@@ -77,20 +78,38 @@ const testimonials = [
   },
 ];
 
-const companyNames = [
-  "Microsoft",
-  "Oracle",
-  "Amazon",
-  "Adobe",
-  "Google",
-  "Deloitte",
-  "Accenture",
-];
+const companyLogos = [
+  { name: "Microsoft", src: "/logos/marquee/microsoft.png", width: 140, height: 30 },
+  { name: "Oracle", src: "/logos/marquee/oracle.png", width: 120, height: 28 },
+  { name: "Amazon", src: "/logos/marquee/amazon.png", width: 110, height: 34 },
+  { name: "Adobe", src: "/logos/marquee/adobe.svg", width: 120, height: 32 },
+  { name: "Google", src: "/logos/marquee/google.png", width: 110, height: 36 },
+  { name: "Deloitte", src: "/logos/marquee/deloitte.svg", width: 130, height: 32 },
+  { name: "Accenture", src: "/logos/marquee/accenture.png", width: 120, height: 32 },
+] as const;
+
+const BROCHURE_AUTO_DELAY_MS = 15_000;
+
+function getScrollProgress() {
+  const doc = document.documentElement;
+  const body = document.body;
+  const scrollTop = window.scrollY || doc.scrollTop || body.scrollTop || 0;
+  const scrollHeight = Math.max(doc.scrollHeight, body.scrollHeight);
+  const maxScroll = Math.max(scrollHeight - window.innerHeight, 1);
+  return scrollTop / maxScroll;
+}
 
 export default function ProgramsPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [enrollModalOpen, setEnrollModalOpen] = useState(false);
   const appRef = useRef<HTMLDivElement>(null);
+  const midpointRef = useRef<HTMLDivElement>(null);
+  const modalOpenRef = useRef(false);
+  const enrollModalOpenRef = useRef(false);
+  const autoOpenedRef = useRef(false);
+
+  modalOpenRef.current = modalOpen;
+  enrollModalOpenRef.current = enrollModalOpen;
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -119,6 +138,87 @@ export default function ProgramsPage() {
     return () => {
       observer.disconnect();
       window.removeEventListener("pointermove", onPointerMove);
+    };
+  }, []);
+
+  // Auto-open brochure when EITHER condition is met first:
+  // 1) user stays on this page for 15+ seconds
+  // 2) user scrolls to ~50% / midpoint of the page
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    autoOpenedRef.current = false;
+
+    let cancelled = false;
+    let dwellTimerId = 0;
+    let retryTimerId = 0;
+    let midObserver: IntersectionObserver | null = null;
+
+    const cleanup = () => {
+      window.clearTimeout(dwellTimerId);
+      window.clearTimeout(retryTimerId);
+      window.removeEventListener("scroll", onScrollHalf, true);
+      midObserver?.disconnect();
+      midObserver = null;
+    };
+
+    const openFromAutoTrigger = () => {
+      if (cancelled || autoOpenedRef.current) return;
+
+      // Already open manually — treat as handled for this visit
+      if (modalOpenRef.current) {
+        autoOpenedRef.current = true;
+        cleanup();
+        return;
+      }
+
+      // Wait until enroll modal is closed, then retry
+      if (enrollModalOpenRef.current) {
+        retryTimerId = window.setTimeout(() => {
+          if (!cancelled) openFromAutoTrigger();
+        }, 700);
+        return;
+      }
+
+      autoOpenedRef.current = true;
+      cleanup();
+      setModalOpen(true);
+    };
+
+    // Condition 1: dwell time >= 15s
+    dwellTimerId = window.setTimeout(() => {
+      openFromAutoTrigger();
+    }, BROCHURE_AUTO_DELAY_MS);
+
+    // Condition 2: scrolled halfway
+    const onScrollHalf = () => {
+      if (cancelled || autoOpenedRef.current) return;
+      if (getScrollProgress() >= 0.5) {
+        openFromAutoTrigger();
+      }
+    };
+
+    window.addEventListener("scroll", onScrollHalf, { passive: true, capture: true });
+    onScrollHalf();
+
+    // Condition 2 (backup): midpoint marker enters the viewport
+    const midpointNode = midpointRef.current;
+    if (midpointNode) {
+      midObserver = new IntersectionObserver(
+        (entries) => {
+          if (cancelled || autoOpenedRef.current) return;
+          if (entries.some((entry) => entry.isIntersecting)) {
+            openFromAutoTrigger();
+          }
+        },
+        { root: null, threshold: 0 },
+      );
+      midObserver.observe(midpointNode);
+    }
+
+    return () => {
+      cancelled = true;
+      cleanup();
     };
   }, []);
 
@@ -196,6 +296,8 @@ export default function ProgramsPage() {
           </div>
         </section>
 
+        <ProjectsRoadmapSection />
+
         {/* AUDIENCE SECTION */}
         <section className="program-audience section-pad">
           <div className="section-container">
@@ -261,6 +363,13 @@ export default function ProgramsPage() {
         </section>
 
         {/* TRAINER SECTION */}
+        {/* Auto-brochure trigger: fires when this midpoint enters the viewport */}
+        <div
+          ref={midpointRef}
+          className="programs-brochure-midpoint"
+          aria-hidden="true"
+        />
+
         <section className="trainer-section section-pad" id="trainer">
           <div className="section-container">
             <div className="trainer-heading reveal">
@@ -290,10 +399,10 @@ export default function ProgramsPage() {
                     <div className="trainer-role-item">
                       <div className="trainer-role-logo-wrap">
                         <Image
-                          src="/logos/clients/amazon_a.svg"
+                          src="/logos/clients/amazon_logo.png"
                           alt="Amazon"
-                          width={32}
-                          height={32}
+                          width={40}
+                          height={40}
                           className="object-contain"
                         />
                       </div>
@@ -391,44 +500,55 @@ export default function ProgramsPage() {
                 {/* BOTTOM RIGHT: Trained Across Logos */}
                 <div className="trainer-clients-block">
                   <h4 className="trainer-clients-heading">Trained across:</h4>
-                  <div className="trainer-clients-stack">
-                    <div className="trainer-client-pill">
-                      <Image
-                        src="/logos/clients/deloitte_clean.png"
-                        alt="Deloitte"
-                        width={130}
-                        height={32}
-                        className="trainer-client-img"
-                      />
-                    </div>
-    
-                    {/* <div className="trainer-client-pill">
-                      <Image
-                        src="/logos/clients/centric.svg"
-                        alt="Centric"
-                        width={130}
-                        height={32}
-                        className="trainer-client-img"
-                      />
-                    </div> */}
-                    <div className="trainer-client-pill">
-                      <Image
-                        src="/logos/clients/accenture_clean.png"
-                        alt="Accenture"
-                        width={136}
-                        height={36}
-                        className="trainer-client-img"
-                      />
-                    </div>
-                    <div className="trainer-client-pill trainer-client-pill-aicte">
-                      <Image
-                        src="/logos/clients/aicte_clean.png"
-                        alt="AICTE & AICTE IDEA Lab"
-                        width={140}
-                        height={54}
-                        className="trainer-client-img"
-                      />
-                    </div>
+                  <div className="trainer-clients-box" role="list" aria-label="Organizations trained across">
+                    {[
+                      {
+                        name: "Centric",
+                        src: "/logos/clients/centric.svg",
+                        width: 118,
+                        height: 28,
+                      },
+                      {
+                        name: "Accenture",
+                        src: "/logos/clients/accenture_clean.png",
+                        width: 122,
+                        height: 32,
+                      },
+                      {
+                        name: "Deloitte",
+                        src: "/logos/clients/deloitte.svg",
+                        width: 118,
+                        height: 28,
+                      },
+                      {
+                        name: "AICTE & AICTE IDEA Lab",
+                        src: "/logos/clients/aicte_clean.png",
+                        width: 118,
+                        height: 44,
+                        className: "is-tall",
+                      },
+                      {
+                        name: "IIT Madras",
+                        src: "/logos/clients/iit_madras.png",
+                        width: 48,
+                        height: 48,
+                        className: "is-tall is-seal",
+                      },
+                    ].map((client) => (
+                      <div
+                        key={client.name}
+                        className={`trainer-client-logo${client.className ? ` ${client.className}` : ""}`}
+                        role="listitem"
+                      >
+                        <Image
+                          src={client.src}
+                          alt={client.name}
+                          width={client.width}
+                          height={client.height}
+                          className="trainer-client-img"
+                        />
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -499,8 +619,16 @@ export default function ProgramsPage() {
               <p className="marquee-label">Experience shaped by the industry</p>
               <div className="company-marquee" aria-label="Industry companies">
                 <div className="company-track">
-                  {[...companyNames, ...companyNames].map((company, index) => (
-                    <span key={`${company}-${index}`}>{company}</span>
+                  {[...companyLogos, ...companyLogos].map((company, index) => (
+                    <span className="company-logo" key={`${company.name}-${index}`}>
+                      <Image
+                        src={company.src}
+                        alt={company.name}
+                        width={company.width}
+                        height={company.height}
+                        className="company-logo-image"
+                      />
+                    </span>
                   ))}
                 </div>
               </div>

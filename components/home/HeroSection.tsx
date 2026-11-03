@@ -23,7 +23,11 @@ export default function HeroSection() {
             Learn AI. Build what’s next.
           </div>
           <h1>
-            AI Training. <span>Real-World Skills.</span> Career Growth.
+            AI Training.
+            <br />
+            <span>Real-World Skills.</span>
+            <br />
+            Career Growth.
           </h1>
           <p>
             Build in-demand AI skills, learn from industry experts, and unlock

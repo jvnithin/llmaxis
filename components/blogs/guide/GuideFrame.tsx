@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
+import ExternalLinkProvider from "@/components/blogs/guide/external-link/ExternalLinkProvider";
+import GuideMobileActions from "@/components/blogs/guide/GuideMobileActions";
 
 type TocItem = { id: string; text: string; level: 2 | 3 | 4 };
 
@@ -40,46 +42,49 @@ export default function GuideFrame({
   }, [toc]);
 
   return (
-    <main className="guide-page">
-      <div className="guide-shell">
-        <p className="guide-crumb">
-          <Link href="/blogs">Guides</Link>
-          <span aria-hidden="true">/</span>
-          <span>{title}</span>
-        </p>
-        <div className="guide-layout">
-          <nav className="guide-toc" aria-label="Contents">
-            <p>Contents</p>
-            <ol>
-              {toc.map((item) => (
-                <li key={item.id}>
-                  <a
-                    href={`#${item.id}`}
-                    className={[
-                      item.id === active ? "is-active" : "",
-                      item.level === 3 ? "is-sub" : "",
-                      item.level === 4 ? "is-deep" : "",
-                    ]
-                      .filter(Boolean)
-                      .join(" ") || undefined}
-                    onClick={() => setActive(item.id)}
-                  >
-                    {item.text}
-                  </a>
-                </li>
-              ))}
-            </ol>
-          </nav>
-          <article className="guide-article">
-            <header>
-              <h1>{title}</h1>
-              {description ? <p key="guide-description">{description}</p> : null}
-            </header>
-            {body}
-          </article>
-          {aside}
+    <ExternalLinkProvider>
+      <main className="guide-page">
+        <div className="guide-shell">
+          <p className="guide-crumb">
+            <Link href="/blogs">Guides</Link>
+            <span aria-hidden="true">/</span>
+            <span>{title}</span>
+          </p>
+          <div className="guide-layout">
+            <nav className="guide-toc" aria-label="Contents">
+              <p>Contents</p>
+              <ol>
+                {toc.map((item) => (
+                  <li key={item.id}>
+                    <a
+                      href={`#${item.id}`}
+                      className={[
+                        item.id === active ? "is-active" : "",
+                        item.level === 3 ? "is-sub" : "",
+                        item.level === 4 ? "is-deep" : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" ") || undefined}
+                      onClick={() => setActive(item.id)}
+                    >
+                      {item.text}
+                    </a>
+                  </li>
+                ))}
+              </ol>
+            </nav>
+            <article className="guide-article">
+              <header>
+                <h1>{title}</h1>
+                {description ? <p key="guide-description">{description}</p> : null}
+              </header>
+              {body}
+            </article>
+            {aside}
+          </div>
         </div>
-      </div>
-    </main>
+        <GuideMobileActions />
+      </main>
+    </ExternalLinkProvider>
   );
 }

@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import type { GuideBlock, Inline } from "@/lib/guideMarkdown";
+import GuideExternalLink from "@/components/blogs/guide/external-link/GuideExternalLink";
 
 export default function GuideBody({ blocks }: { blocks: GuideBlock[] }) {
   return (
@@ -66,9 +67,9 @@ function renderInlines(nodes: Inline[]): ReactNode {
     if (node.type === "text") return <span key={index}>{node.text}</span>;
     if (node.type === "strong") return <strong key={index}>{renderInlines(node.children)}</strong>;
     return (
-      <a key={index} href={node.href} target="_blank" rel="noopener noreferrer">
+      <GuideExternalLink key={index} href={node.href}>
         {renderInlines(node.children)}
-      </a>
+      </GuideExternalLink>
     );
   });
 }

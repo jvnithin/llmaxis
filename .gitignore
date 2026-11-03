@@ -22,7 +22,11 @@
 
 # misc
 .DS_Store
+Thumbs.db
+Desktop.ini
 *.pem
+*.log
+*.zip
 
 # debug
 npm-debug.log*
@@ -30,15 +34,33 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# env files (secrets — never commit)
+.env
+.env.*
+!.env.example
 
-# local editor config that can contain access tokens
-.cursor/mcp.json
+# local editor / AI tooling
+.cursor/
+.vscode/
+.idea/
+*.swp
+*.swo
 
 # vercel
 .vercel
 
-# typescript
+# typescript / build caches
 *.tsbuildinfo
 next-env.d.ts
+
+# local authoring sources (converted into content/ for the live site)
+/articles/
+/roadmaps/
+/scripts/
+*.docx
+*.DOCX
+
+# local archives / dumps
+*.bak
+*.tmp
+*.temp

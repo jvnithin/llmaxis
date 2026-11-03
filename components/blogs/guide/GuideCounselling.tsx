@@ -64,16 +64,16 @@ export default function GuideCounselling({ articleTitle }: { articleTitle: strin
     setLoading(true);
     setSubmitError("");
     try {
-      const response = await fetch("/api/inquiry", {
+      const response = await fetch("/api/counselling", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          inquiryType: "Individuals",
           name: fields.name,
           email: fields.email,
+          program: fields.program,
           country: fields.country,
           phone: fields.phone,
-          message: `Career counselling request from "${articleTitle}". Program: ${fields.program}.`,
+          article: articleTitle,
         }),
       });
       const body = (await response.json().catch(() => null)) as { error?: string } | null;
@@ -90,7 +90,7 @@ export default function GuideCounselling({ articleTitle }: { articleTitle: strin
   }
 
   return (
-    <aside className="guide-aside">
+    <aside className="guide-aside" id="guide-counselling">
       <p className="guide-aside-kicker">Free counselling</p>
       <h2>Get free career counselling</h2>
       {done ? (

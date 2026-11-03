@@ -37,13 +37,18 @@ const LIST_ITEM = /^(\s*)-\s+(.*)$/;
 
 export function parseGuideMarkdown(source: string, images: GuideImage[] = []): GuideDocument {
   const lines = source.replace(/^\uFEFF/, "").replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n");
-  const titleLine = lines.find((line) => /^#\s+/.test(line)) ?? "";
+  const seoIndex = lines.findIndex((line) =>
+    /^#{1,4}\s+(?:\*\*)?\s*(?:SEO\b|Internal linking plan\b)/i.test(line.trim()),
+  );
+  const seoLines = seoIndex >= 0 ? lines.slice(seoIndex + 1) : [];
+  const articleLines = seoIndex >= 0 ? lines.slice(0, seoIndex) : lines;
+  const titleLine = articleLines.find((line) => /^#\s+/.test(line)) ?? "";
   const title = plainHeading(titleLine.replace(/^#\s+/, ""));
-  const firstSection = lines.findIndex((line) => /^##\s+/.test(line));
-  const preamble = firstSection > 0 ? lines.slice(0, firstSection) : [];
-  const metaTitle = metaField(preamble, "Meta title") || title;
-  const metaDescription = metaField(preamble, "Meta description");
-  const body = firstSection >= 0 ? lines.slice(firstSection) : lines;
+  const firstSection = articleLines.findIndex((line) => /^##\s+/.test(line));
+  const preamble = firstSection > 0 ? articleLines.slice(0, firstSection) : [];
+  const metaTitle = metaField(preamble, "Meta title") || metaField(seoLines, "SEO title") || metaField(preamble, "SEO title") || title;
+  const metaDescription = metaField(preamble, "Meta description") || metaField(seoLines, "Meta description");
+  const body = firstSection >= 0 ? articleLines.slice(firstSection) : articleLines;
   const blocks = attachImages(parseBlocks(body), images);
 
   return {
@@ -58,6 +63,13 @@ export function parseGuideMarkdown(source: string, images: GuideImage[] = []): G
 }
 
 function attachImages(blocks: GuideBlock[], images: GuideImage[]) {
+  if (images.length === 0) return blocks;
+  const numbered = images.filter((image) => image.section > 0);
+  const loose = images.filter((image) => image.section === 0);
+  return attachLooseImages(attachNumberedImages(blocks, numbered), loose);
+}
+
+function attachNumberedImages(blocks: GuideBlock[], images: GuideImage[]) {
   if (images.length === 0) return blocks;
   const pending = [...images].sort((a, b) => a.section - b.section || a.subsection - b.subsection);
   const next: GuideBlock[] = [];
@@ -81,6 +93,80 @@ function attachImages(blocks: GuideBlock[], images: GuideImage[]) {
     }
   }
 
+  return next;
+}
+
+const LOOSE_STOP = new Set([
+  "the", "and", "for", "with", "from", "your", "into", "that", "this", "are",
+  "how", "what", "does", "you", "can", "its", "our", "their", "about", "than",
+  "thumbnail", "infographic", "presentation", "titled", "graphic", "image",
+]);
+
+function looseTokens(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .split(" ")
+    .filter((word) => word.length > 2 && !LOOSE_STOP.has(word));
+}
+
+function sameToken(left: string, right: string) {
+  return left === right || `${left}s` === right || left === `${right}s`;
+}
+
+function tokenScore(left: string[], right: string[]) {
+  let score = 0;
+  for (const word of left) {
+    if (right.some((other) => sameToken(word, other))) score += word.length >= 6 ? 2 : 1;
+  }
+  return score;
+}
+
+function attachLooseImages(blocks: GuideBlock[], images: GuideImage[]) {
+  if (images.length === 0) return blocks;
+  const headingIndexes = blocks.flatMap((block, index) => (block.type === "heading" ? [index] : []));
+  const placed = new Map<number, GuideImage[]>();
+  const unmatched: GuideImage[] = [];
+
+  for (const image of images) {
+    const imageTokens = looseTokens(image.alt);
+    let bestIndex = -1;
+    let bestScore = 0;
+    for (const index of headingIndexes) {
+      const heading = blocks[index];
+      if (heading.type !== "heading") continue;
+      const score = tokenScore(imageTokens, looseTokens(heading.text));
+      if (score > bestScore) {
+        bestScore = score;
+        bestIndex = index;
+      }
+    }
+    if (bestIndex >= 0 && bestScore >= 2) {
+      placed.set(bestIndex, [...(placed.get(bestIndex) ?? []), image]);
+    } else {
+      unmatched.push(image);
+    }
+  }
+
+  const openSections = headingIndexes.filter((index) => {
+    const heading = blocks[index];
+    return heading.type === "heading" && heading.level === 2 && !placed.has(index);
+  });
+  unmatched.forEach((image, index) => {
+    const slot = openSections.length
+      ? openSections[Math.min(openSections.length - 1, Math.floor(((index + 0.5) * openSections.length) / unmatched.length))]
+      : headingIndexes[headingIndexes.length - 1];
+    if (slot === undefined) return;
+    placed.set(slot, [...(placed.get(slot) ?? []), image]);
+  });
+
+  const next: GuideBlock[] = [];
+  blocks.forEach((block, index) => {
+    next.push(block);
+    for (const image of placed.get(index) ?? []) {
+      next.push({ type: "image", src: image.src, alt: image.alt });
+    }
+  });
   return next;
 }
 
@@ -341,5 +427,5 @@ function metaField(lines: string[], label: string) {
     if (/^\*\*[^*]+:\*\*/.test(trimmed) || /^#{1,6}\s+/.test(trimmed)) break;
     if (trimmed) collected.push(trimmed);
   }
-  return applyDashes(unescapePandoc(collected.join(" "))).replace(/\s+/g, " ").trim();
+  return applyDashes(unescapePandoc(collected.join(" "))).replace(/\\/g, "").replace(/\s+/g, " ").trim();
 }

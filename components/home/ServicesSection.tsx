@@ -6,6 +6,7 @@ import Icon, { IconName } from "./Icon";
 import BusinessEnquiryModal from "./business-enquiry/BusinessEnquiryModal";
 import CommunityJoinModal from "./community/CommunityJoinModal";
 import JobAssistanceModal from "./job-assistance/JobAssistanceModal";
+import PartnershipModal from "./partnership/PartnershipModal";
 
 interface ServiceItem {
   icon: IconName;
@@ -73,6 +74,7 @@ export default function ServicesSection() {
   const [activeService, setActiveService] = useState<string | null>(null);
   const [communityOpen, setCommunityOpen] = useState(false);
   const [jobAssistanceOpen, setJobAssistanceOpen] = useState(false);
+  const [partnershipOpen, setPartnershipOpen] = useState(false);
 
   return (
     <section className="intro section-pad" id="programs">
@@ -102,12 +104,19 @@ export default function ServicesSection() {
                 <p className="eyebrow">{group.eyebrow}</p>
                 <h3>{group.title}</h3>
                 <p>{group.description}</p>
-                <a href="#contact" className="text-button">
-                  {groupIndex === 0
-                    ? "Find your program"
-                    : "Explore a partnership"}{" "}
-                  <Icon name="arrow" size={17} />
-                </a>
+                {groupIndex === 0 ? (
+                  <Link href="/learning" className="text-button">
+                    Find your program <Icon name="arrow" size={17} />
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    className="text-button"
+                    onClick={() => setPartnershipOpen(true)}
+                  >
+                    Explore a partnership <Icon name="arrow" size={17} />
+                  </button>
+                )}
               </div>
               <div className="service-cards">
                 {group.services.map((service) => {
@@ -188,6 +197,9 @@ export default function ServicesSection() {
       />
       <CommunityJoinModal open={communityOpen} onClose={() => setCommunityOpen(false)} />
       <JobAssistanceModal open={jobAssistanceOpen} onClose={() => setJobAssistanceOpen(false)} />
+      {partnershipOpen ? (
+        <PartnershipModal onClose={() => setPartnershipOpen(false)} />
+      ) : null}
     </section>
   );
 }

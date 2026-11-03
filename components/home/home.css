@@ -122,12 +122,13 @@
 .hero {
   position: relative;
   display: flex;
-  min-height: 880px;
-  align-items: center;
+  min-height: min(100svh, 820px);
+  align-items: flex-start;
   isolation: isolate;
   overflow: hidden;
   border-bottom: 1px solid var(--line);
-  padding-top: 72px;
+  padding-top: 118px;
+  padding-bottom: 40px;
   background:
     linear-gradient(to bottom, transparent 62%, #f8f9ff 100%),
     radial-gradient(ellipse at 72% 44%, rgba(92, 77, 250, 0.14), transparent 34%),
@@ -247,7 +248,7 @@
 .hero-content {
   display: grid;
   align-items: center;
-  padding-top: 84px;
+  /* padding-top: -184px; */
   grid-template-columns: 1.08fr 0.92fr;
 }
 
@@ -283,7 +284,7 @@
 .hero h1 {
   max-width: 760px;
   margin-bottom: 25px;
-  font-size: clamp(3.5rem, 6.8vw, 6.15rem);
+  font-size: clamp(2.5rem, 5.8vw, 5.15rem);
   letter-spacing: -0.058em;
   line-height: 0.97;
   color: #17182b;
@@ -964,6 +965,15 @@ button.service-card {
   font-weight: 700;
 }
 
+/* Tighten space between stories and contact */
+.stories.section-pad {
+  padding-bottom: 48px;
+}
+
+.contact.section-pad {
+  padding-top: 48px;
+}
+
 /* Contact Section */
 .contact {
   position: relative;
@@ -1307,6 +1317,14 @@ button.service-card {
   .section-pad {
     padding: 92px 0;
   }
+
+  .stories.section-pad {
+    padding-bottom: 36px;
+  }
+
+  .contact.section-pad {
+    padding-top: 36px;
+  }
   .hero {
     min-height: 950px;
     align-items: flex-start;
@@ -1345,6 +1363,10 @@ button.service-card {
   }
   .service-card {
     min-height: 220px;
+  }
+  .card-arrow {
+    top: 22px;
+    bottom: auto;
   }
   .why-layout,
   .contact-layout {
