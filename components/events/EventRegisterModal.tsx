@@ -1,11 +1,26 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { X, CheckCircle2, MessageCircle, Lock, ShieldCheck, AlertCircle } from "lucide-react";
 import { event as trackFbEvent } from "@/lib/fpixel";
-import { countries } from "@/lib/countries";
+import { countries, getCountry } from "@/lib/countries";
+import { quoteEventPrice } from "@/lib/eventPrice";
+import { detectCountryClient } from "@/lib/clientGeo";
 
 export { countries };
+
+type PricingQuote = {
+  currency: string;
+  amountMinor: number;
+  amountMajor: number;
+  formattedPrice: string;
+  countryCode: string;
+  countryName: string;
+  taxableAmountMajor?: number;
+  gstRate?: number;
+  gstAmountMajor?: number;
+  includesGst?: boolean;
+};
 
 const APPS_SCRIPT_URL =
   process.env.NEXT_PUBLIC_ENROLLMENT_APPS_SCRIPT_URL ||
@@ -25,7 +40,10 @@ interface EventRegisterModalProps {
 
 const loadRazorpaySDK = (): Promise<boolean> => {
   return new Promise((resolve) => {
-    if (typeof window !== "undefined" && (window as any).Razorpay) {
+    if (
+      typeof window !== "undefined" &&
+      (window as unknown as { Razorpay?: unknown }).Razorpay
+    ) {
       resolve(true);
       return;
     }
@@ -108,26 +126,147 @@ export default function EventRegisterModal({
     amount: string;
   } | null>(null);
   const [error, setError] = useState("");
+  const [pricing, setPricing] = useState<PricingQuote | null>(null);
+  const [geoApplied, setGeoApplied] = useState(false);
 
-  const eventPrice = process.env.NEXT_PUBLIC_EVENT_PRICE || "206";
-  const eventCurrency = process.env.NEXT_PUBLIC_EVENT_CURRENCY || "USD";
-  const defaultFormattedPrice = eventCurrency === "USD" ? `$${eventPrice}` : `₹${eventPrice}`;
-  const defaultKeyId =
-    process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ||
-    process.env.RAZORPAY_KEY_ID ||
-    "rzp_live_Tl1rwsxDyqo61i";
+  const defaultKeyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "";
 
-  // Track ViewContent event when registration modal opens
+  const fetchPricing = useCallback(async (countryName: string, countryCode?: string) => {
+    try {
+      // POST — GET searchParams are ignored under output: "export" + force-static.
+      const res = await fetch("/api/pricing/country", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          country: countryName,
+          countryCode: countryCode || undefined,
+        }),
+      });
+      const contentType = res.headers.get("content-type") || "";
+      const data = contentType.includes("application/json") ? await res.json() : null;
+      if (!res.ok || !data?.success) {
+        throw new Error(data?.error || "Unable to load pricing");
+      }
+      const quote: PricingQuote = {
+        currency: data.currency,
+        amountMinor: data.amountMinor,
+        amountMajor: data.amountMajor,
+        formattedPrice: data.formattedPrice,
+        countryCode: data.country?.code || countryCode || "IN",
+        countryName: data.country?.name || countryName,
+        taxableAmountMajor: data.taxableAmountMajor,
+        gstRate: data.gstRate,
+        gstAmountMajor: data.gstAmountMajor,
+        includesGst: Boolean(data.includesGst),
+      };
+      setPricing(quote);
+      return {
+        quote,
+        detected: data.detected as
+          | { countryCode?: string; countryName?: string }
+          | undefined,
+      };
+    } catch (err) {
+      console.error("Pricing API unavailable, using client FX quote:", err);
+      try {
+        const local = await quoteEventPrice({
+          countryCode: countryCode || undefined,
+          countryName,
+        });
+        const quote: PricingQuote = {
+          currency: local.currency,
+          amountMinor: local.amountMinor,
+          amountMajor: local.amountMajor,
+          formattedPrice: local.formattedPrice,
+          countryCode: local.countryCode,
+          countryName: local.countryName,
+          taxableAmountMajor: local.taxableAmountMajor,
+          gstRate: local.gstRate,
+          gstAmountMajor: local.gstAmountMajor,
+          includesGst: local.includesGst,
+        };
+        setPricing(quote);
+        return { quote, detected: undefined };
+      } catch (localErr) {
+        console.error("Client pricing fallback failed:", localErr);
+        return null;
+      }
+    }
+  }, []);
+
   useEffect(() => {
-    if (isOpen) {
+    if (!isOpen || geoApplied) return;
+
+    let cancelled = false;
+    (async () => {
+      // On localhost the server often only sees a private IP and returns EVENT_FALLBACK_COUNTRY.
+      // Prefer a real IP lookup from the browser whenever server detection is missing or fallback.
+      let detectedCode: string | undefined;
+      let detectedName: string | undefined;
+      let serverMethod: string | undefined;
+
+      try {
+        const probe = await fetch("/api/pricing/country", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({}),
+        });
+        const contentType = probe.headers.get("content-type") || "";
+        const data = contentType.includes("application/json") ? await probe.json() : null;
+        if (probe.ok && data?.success && data.detected) {
+          serverMethod = data.detected.detectionMethod;
+          if (serverMethod && serverMethod !== "fallback") {
+            detectedCode = data.detected.countryCode;
+            detectedName = data.detected.countryName;
+          }
+        }
+      } catch {
+        // ignore — client geo below
+      }
+
+      if (!detectedCode) {
+        const clientGeo = await detectCountryClient();
+        detectedCode = clientGeo.countryCode;
+        detectedName = clientGeo.countryName;
+      }
+
+      if (cancelled) return;
+
+      const detectedCountry =
+        (detectedName && getCountry(detectedName)) ||
+        countries.find((c) => c.code === detectedCode) ||
+        getCountry("India");
+
+      if (detectedCountry) {
+        setForm((prev) => ({
+          ...prev,
+          country: detectedCountry.name,
+          dialCode: detectedCountry.dial,
+        }));
+      }
+
+      const result = await fetchPricing(
+        detectedCountry?.name || "India",
+        detectedCountry?.code || "IN",
+      );
+      if (cancelled || !result) {
+        setGeoApplied(true);
+        return;
+      }
+
+      setGeoApplied(true);
       trackFbEvent("ViewContent", {
         content_name: eventName,
         content_category: "Registration",
-        currency: eventCurrency,
-        value: Number(eventPrice) || 1,
+        currency: result.quote.currency,
+        value: result.quote.amountMajor,
       });
-    }
-  }, [isOpen, eventCurrency, eventPrice, eventName]);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, eventName, fetchPricing, geoApplied]);
 
   const handleCountryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selected = countries.find((c) => c.name === e.target.value);
@@ -136,6 +275,7 @@ export default function EventRegisterModal({
       country: e.target.value,
       dialCode: selected?.dial ?? "+91",
     }));
+    void fetchPricing(e.target.value, selected?.code);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -156,79 +296,82 @@ export default function EventRegisterModal({
 
     try {
       const formattedPhone = `${form.dialCode} ${form.phone.trim()}`;
-      const amountFormatted = defaultFormattedPrice;
+      const countryMeta = getCountry(form.country);
+      const pricingResult =
+        pricing ||
+        (await fetchPricing(form.country, countryMeta?.code))?.quote ||
+        null;
 
-      // Track Lead and InitiateCheckout in Meta Pixel
+      // Always create a server-side order so amount/currency cannot be client-tampered.
+      const res = await fetch("/api/events/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name.trim(),
+          email: form.email.trim(),
+          country: form.country,
+          countryCode: countryMeta?.code,
+          phone: formattedPhone,
+          event: eventName,
+        }),
+      });
+
+      const contentType = res.headers.get("content-type") || "";
+      const data =
+        contentType.includes("application/json") ? await res.json() : null;
+
+      if (!res.ok || !data?.success || !data.orderId) {
+        throw new Error(data?.error || "Unable to create payment order. Please try again.");
+      }
+
+      const amountFormatted =
+        data.priceFormatted || pricingResult?.formattedPrice || "";
+      const orderCurrency = data.currency;
+      const orderAmount = data.amount;
+      const backendOrderId = data.orderId as string;
+      const backendKeyId = data.keyId || defaultKeyId;
+
+      if (!backendKeyId) {
+        throw new Error("Razorpay key is not configured.");
+      }
+
       trackFbEvent("Lead", {
         content_name: eventName,
         content_category: "Registration",
-        currency: eventCurrency,
-        value: Number(eventPrice) || 1,
+        currency: orderCurrency,
+        value: data.amountMajor ?? pricingResult?.amountMajor ?? 0,
       });
 
       trackFbEvent("InitiateCheckout", {
         content_name: eventName,
-        currency: eventCurrency,
-        value: Number(eventPrice) || 1,
+        currency: orderCurrency,
+        value: data.amountMajor ?? pricingResult?.amountMajor ?? 0,
         num_items: 1,
       });
 
-      // 1. Immediately log lead as Pending in Google Sheet
       sendToGoogleSheet({
         name: form.name.trim(),
         email: form.email.trim(),
         country: form.country,
         phone: formattedPhone,
         paymentStatus: "Pending",
+        orderId: backendOrderId,
         amount: amountFormatted,
         event: eventName,
       });
 
-      // 2. Load Razorpay Checkout SDK
       const sdkLoaded = await loadRazorpaySDK();
       if (!sdkLoaded) {
         throw new Error("Unable to load Razorpay payment gateway. Please check your internet connection.");
       }
 
-      // 3. Attempt server order creation if backend endpoint is available (safe fallback for static deployments)
-      let backendKeyId = defaultKeyId;
-      let backendOrderId: string | undefined = undefined;
-      let orderAmount = Math.round((Number(eventPrice) || 206) * 100);
-
-      try {
-        const res = await fetch("/api/events/create-order", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: form.name.trim(),
-            email: form.email.trim(),
-            country: form.country,
-            phone: formattedPhone,
-            event: eventName,
-          }),
-        });
-
-        if (res.ok) {
-          const contentType = res.headers.get("content-type") || "";
-          if (contentType.includes("application/json")) {
-            const data = await res.json();
-            if (data.success && data.orderId) {
-              backendOrderId = data.orderId;
-              backendKeyId = data.keyId || backendKeyId;
-              if (data.amount) orderAmount = data.amount;
-            }
-          }
-        }
-      } catch (backendErr) {
-        console.warn("Backend order creation skipped, using client gateway:", backendErr);
-      }
-
       const itemDescription = description || `${eventName} - LLM Axis`;
 
-      const options: any = {
+      const options: Record<string, unknown> = {
         key: backendKeyId,
         amount: orderAmount,
-        currency: eventCurrency,
+        currency: orderCurrency,
+        order_id: backendOrderId,
         name: "LLM Axis",
         description: itemDescription,
         image: "/logo.jpeg",
@@ -240,11 +383,14 @@ export default function EventRegisterModal({
         theme: {
           color: "#7c3aed",
         },
-        handler: async function (response: any) {
+        handler: async function (response: {
+          razorpay_payment_id: string;
+          razorpay_order_id: string;
+          razorpay_signature: string;
+        }) {
           try {
             setLoading(true);
 
-            // Log Paid status directly to Google Sheet
             await sendToGoogleSheet({
               name: form.name.trim(),
               email: form.email.trim(),
@@ -252,21 +398,19 @@ export default function EventRegisterModal({
               phone: formattedPhone,
               paymentStatus: "Paid",
               paymentId: response.razorpay_payment_id,
-              orderId: response.razorpay_order_id || backendOrderId || "N/A",
+              orderId: response.razorpay_order_id || backendOrderId,
               amount: amountFormatted,
               event: eventName,
             });
 
-            // Track Purchase in Meta Pixel
             trackFbEvent("Purchase", {
               content_name: eventName,
-              currency: eventCurrency,
-              value: Number(eventPrice) || 1,
+              currency: orderCurrency,
+              value: data.amountMajor ?? pricingResult?.amountMajor ?? 0,
               transaction_id: response.razorpay_payment_id,
             });
 
-            // Optional verification call to backend if present
-            if (response.razorpay_signature && backendOrderId) {
+            if (response.razorpay_signature) {
               fetch("/api/events/verify-payment", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -277,6 +421,7 @@ export default function EventRegisterModal({
                   name: form.name.trim(),
                   email: form.email.trim(),
                   country: form.country,
+                  countryCode: countryMeta?.code,
                   phone: formattedPhone,
                   amount: amountFormatted,
                   event: eventName,
@@ -289,7 +434,7 @@ export default function EventRegisterModal({
               amount: amountFormatted,
             });
             setSubmitted(true);
-          } catch (err: any) {
+          } catch (err) {
             console.error("Payment confirmation error:", err);
             setPaymentInfo({
               paymentId: response.razorpay_payment_id,
@@ -309,7 +454,7 @@ export default function EventRegisterModal({
               country: form.country,
               phone: formattedPhone,
               paymentStatus: "Cancelled",
-              orderId: backendOrderId || "N/A",
+              orderId: backendOrderId,
               amount: amountFormatted,
               event: eventName,
             });
@@ -317,20 +462,21 @@ export default function EventRegisterModal({
         },
       };
 
-      if (backendOrderId) {
-        options.order_id = backendOrderId;
-      }
-
-      const razorpayInstance = new (window as any).Razorpay(options);
-      razorpayInstance.on("payment.failed", function (response: any) {
+      const razorpayInstance = new (window as unknown as {
+        Razorpay: new (opts: Record<string, unknown>) => {
+          on: (event: string, cb: (response: { error?: { description?: string } }) => void) => void;
+          open: () => void;
+        };
+      }).Razorpay(options);
+      razorpayInstance.on("payment.failed", function (response) {
         setLoading(false);
         setError(`Payment failed: ${response.error?.description || "Transaction declined"}`);
       });
 
       razorpayInstance.open();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Payment initialization error:", err);
-      setError(err.message || "Unable to open payment window. Please try again.");
+      setError(err instanceof Error ? err.message : "Unable to open payment window. Please try again.");
       setLoading(false);
     }
   };
@@ -340,6 +486,8 @@ export default function EventRegisterModal({
     setTimeout(() => {
       setSubmitted(false);
       setPaymentInfo(null);
+      setPricing(null);
+      setGeoApplied(false);
       setForm({
         name: "",
         email: "",
@@ -512,6 +660,12 @@ export default function EventRegisterModal({
                 </div>
               )}
 
+              {pricing?.includesGst ? (
+                <p className="text-[11px] text-slate-500 text-center">
+                  Includes 18% GST for India
+                </p>
+              ) : null}
+
               {/* Action Buttons */}
               <div className="flex gap-3 pt-2">
                 <button
@@ -527,7 +681,13 @@ export default function EventRegisterModal({
                   className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white py-3 rounded-xl text-sm font-semibold shadow hover:shadow-md transition active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Lock className="w-3.5 h-3.5" />
-                  <span>{loading ? "Connecting..." : "Pay Now"}</span>
+                  <span>
+                    {loading
+                      ? "Connecting..."
+                      : pricing?.formattedPrice
+                        ? `Pay ${pricing.formattedPrice}`
+                        : "Pay Now"}
+                  </span>
                 </button>
               </div>
 

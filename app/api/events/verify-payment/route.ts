@@ -1,8 +1,17 @@
-import { NextResponse } from "next/server";
 import crypto from "crypto";
-import { eventCurrency, eventPrice, formatEventPrice } from "@/lib/eventPrice";
+import { quoteEventPrice, formatEventPrice } from "@/lib/eventPrice";
 import { saveEventLeadToGoogleSheet } from "@/lib/googleSheets";
 import { sendMetaServerEvent } from "@/lib/metaConversions";
+
+// Required when next.config has output: "export" (APIs usable in `next dev` only).
+export const dynamic = "force-static";
+
+function signaturesMatch(expected: string, received: string) {
+  const a = Buffer.from(expected, "utf8");
+  const b = Buffer.from(received, "utf8");
+  if (a.length !== b.length) return false;
+  return crypto.timingSafeEqual(a, b);
+}
 
 export async function POST(req: Request) {
   try {
@@ -16,12 +25,13 @@ export async function POST(req: Request) {
       phone,
       amount,
       event,
+      countryCode,
     } = await req.json();
 
     if (!orderId || !paymentId || !signature) {
       return Response.json(
         { success: false, error: "Missing payment verification parameters" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -29,21 +39,30 @@ export async function POST(req: Request) {
     if (!keySecret) {
       return Response.json(
         { success: false, error: "Razorpay secret key not configured" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
-    // Verify Razorpay HMAC signature
     const hmac = crypto.createHmac("sha256", keySecret);
     hmac.update(`${orderId}|${paymentId}`);
     const generatedSignature = hmac.digest("hex");
+    const isAuthentic = signaturesMatch(generatedSignature, String(signature));
+    const selectedEvent =
+      event || "Beyond ChatGPT: How AI Is Learning to Think, Act & Work";
 
-    const isAuthentic = generatedSignature === signature;
-    const selectedEvent = event || "Beyond ChatGPT: How AI Is Learning to Think, Act & Work";
+    let quoteAmount = typeof amount === "string" && amount ? amount : "";
+    try {
+      const quote = await quoteEventPrice({
+        countryCode: countryCode || undefined,
+        countryName: country || undefined,
+      });
+      if (!quoteAmount) quoteAmount = quote.formattedPrice;
+    } catch {
+      if (!quoteAmount) quoteAmount = formatEventPrice();
+    }
 
     if (!isAuthentic) {
       console.error("Razorpay signature verification failed");
-      // Log failure in Google Sheet
       await saveEventLeadToGoogleSheet({
         name: name || "Unknown",
         email: email || "Unknown",
@@ -52,17 +71,16 @@ export async function POST(req: Request) {
         paymentStatus: "Failed",
         orderId,
         paymentId,
-        amount,
+        amount: quoteAmount,
         event: selectedEvent,
       });
 
       return Response.json(
         { success: false, error: "Payment signature verification failed" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    // Payment Verified Successfully -> Store Paid Details in Google Sheet
     await saveEventLeadToGoogleSheet({
       name: name || "Customer",
       email: email || "N/A",
@@ -71,19 +89,23 @@ export async function POST(req: Request) {
       paymentStatus: "Paid",
       paymentId,
       orderId,
-      amount: amount || formatEventPrice(),
+      amount: quoteAmount,
       event: selectedEvent,
     });
 
-    // Optionally dispatch server-side Purchase event via Meta Conversions API
+    const quote = await quoteEventPrice({
+      countryCode: countryCode || undefined,
+      countryName: country || undefined,
+    }).catch(() => null);
+
     sendMetaServerEvent({
       eventName: "Purchase",
       email,
       phone,
       name,
       orderId,
-      value: eventPrice(),
-      currency: eventCurrency(),
+      value: quote?.amountMajor ?? (Number(process.env.EVENT_PRICE) || 1),
+      currency: quote?.currency ?? process.env.EVENT_CURRENCY ?? "USD",
     }).catch(() => {});
 
     return Response.json({
@@ -91,11 +113,14 @@ export async function POST(req: Request) {
       message: "Payment successfully verified and logged",
       paymentId,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error verifying Razorpay payment:", error);
     return Response.json(
-      { success: false, error: error.message || "Payment verification error" },
-      { status: 500 }
+      {
+        success: false,
+        error: error instanceof Error ? error.message : "Payment verification error",
+      },
+      { status: 500 },
     );
   }
 }

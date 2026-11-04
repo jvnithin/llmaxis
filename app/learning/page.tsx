@@ -8,6 +8,7 @@ import Footer from "@/components/layout/Footer";
 import BrochureModal from "@/components/learning/BroucherModal";
 import { ProjectsRoadmapSection } from "@/components/learning/projects-roadmap";
 import EventRegisterModal from "@/components/events/EventRegisterModal";
+import LearnerStoriesSection from "@/components/learning/LearnerStoriesSection";
 import "@/components/learning/programs.css";
 
 const audiences = [
@@ -15,16 +16,19 @@ const audiences = [
     number: "01",
     title: "Students & fresh graduates",
     copy: "Build practical AI skills beyond academic learning and develop projects that make your capabilities visible.",
+    icon: "/images/audience/students.png",
   },
   {
     number: "02",
     title: "Working professionals",
     copy: "Expand your skills with LLMs, RAG, AI agents, and modern AI application development workflows.",
+    icon: "/images/audience/professionals.png",
   },
   {
     number: "03",
     title: "Career switchers & founders",
     copy: "Explore a new technical direction or learn how AI applications can address real business needs.",
+    icon: "/images/audience/founders.png",
   },
 ];
 
@@ -58,23 +62,6 @@ const programBenefits = [
     icon: "value" as IconName,
     title: "Production-ready skills",
     copy: "Explore deployment, security, evaluation, monitoring, and the foundations of scalable AI applications.",
-  },
-];
-
-const testimonials = [
-  {
-    quote:
-      "The projects made complex AI concepts much easier to understand and apply. My practical skills and confidence working with modern GenAI tools and workflows grew.",
-    name: "Suman",
-    role: "Data Scientist",
-    initials: "SM",
-  },
-  {
-    quote:
-      "I really enjoyed the balance between concepts, hands-on labs, and real-world AI applications. It helped me turn what I learned into projects I could actually showcase.",
-    name: "Nandhini",
-    role: "AI Engineer",
-    initials: "DC",
   },
 ];
 
@@ -316,9 +303,21 @@ export default function ProgramsPage() {
             <div className="audience-grid">
               {audiences.map((audience) => (
                 <article className="audience-card reveal" key={audience.number}>
-                  <span>{audience.number}</span>
-                  <h3>{audience.title}</h3>
-                  <p>{audience.copy}</p>
+                  <div className="audience-card-top">
+                    <span>{audience.number}</span>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      className="audience-card-icon"
+                      src={audience.icon}
+                      alt=""
+                      width={24}
+                      height={24}
+                    />
+                  </div>
+                  <div className="audience-card-body">
+                    <h3>{audience.title}</h3>
+                    <p>{audience.copy}</p>
+                  </div>
                 </article>
               ))}
             </div>
@@ -556,43 +555,7 @@ export default function ProgramsPage() {
           </div>
         </section>
 
-        {/* STORIES SECTION */}
-        <section className="program-stories section-pad">
-          <div className="section-container">
-            <div className="trainer-heading reveal">
-              <p className="eyebrow">Learner stories</p>
-              <h2>Hear from the learners.</h2>
-              <p>
-                Discover how learners experience practical, project-based
-                learning with LLM AXIS.
-              </p>
-            </div>
-
-            <div className="program-testimonials">
-              {testimonials.map((story) => (
-                <article
-                  className="program-testimonial reveal"
-                  key={story.name}
-                >
-                  <div
-                    className="story-stars"
-                    aria-label="Five out of five stars"
-                  >
-                    ★★★★★
-                  </div>
-                  <blockquote>“{story.quote}”</blockquote>
-                  <div className="testimonial-person">
-                    <span>{story.initials}</span>
-                    <div>
-                      <strong>{story.name}</strong>
-                      <p>{story.role}</p>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
+        <LearnerStoriesSection />
 
         {/* CTA SECTION */}
         <section className="program-cta" id="enroll">

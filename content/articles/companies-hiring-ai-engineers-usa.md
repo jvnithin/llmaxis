@@ -1,6 +1,7 @@
 ---
 kind: article
-category: "1. AI Careers & US Job Market"
+category: "AI Careers & US Job Market"
+categoryOrder: 1
 ---
 
 # **Which US Companies Are Hiring AI Engineers in 2027? Top Employers, Job Opportunities and Skills**

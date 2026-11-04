@@ -32,6 +32,43 @@ const ARTICLE_FOLDER_HINTS: { test: RegExp; folder: string }[] = [
   { test: /top 10 ai jobs|top ai jobs/i, folder: "Top 10 AI Jobs in the USA in 2027" },
   { test: /companies are hiring|hiring ai engineers/i, folder: "Which US Companies Are Hiring AI Engineers" },
   { test: /good career choice|career choice in the usa/i, folder: "AI career choice in the USA 2027" },
+  { test: /non-it|non it professionals/i, folder: "Can Non-IT Professionals Get Jobs in AI" },
+  { test: /mba graduate/i, folder: "AI Careers for MBA Graduates" },
+  { test: /finance professional/i, folder: "AI Jobs for Finance Professionals" },
+  { test: /marketing professional/i, folder: "AI Jobs for Marketing Professionals" },
+  { test: /healthcare/i, folder: "AI Jobs in Healthcare for Non-Technical Professionals" },
+  { test: /traditional office jobs/i, folder: "How AI Is Changing Traditional Office Jobs" },
+  { test: /ai product manager/i, folder: "What Does an AI Product Manager Do" },
+  { test: /agents vs\.?\s*chatbots|ai agents vs/i, folder: "AI Agents vs. Chatbots What's the Difference" },
+  { test: /fine-tuning vs|fine tuning vs/i, folder: "Fine-Tuning vs. RAG What's the Difference" },
+  { test: /generative ai vs\.?\s*agentic/i, folder: "Generative AI vs. Agentic AI" },
+  { test: /agents used in enterprise/i, folder: "How Are AI Agents Used in Enterprise Businesses" },
+  { test: /agents make decisions/i, folder: "How Do AI Agents Make Decisions" },
+  { test: /large language models|\bllms?\b/i, folder: "What Are Large Language Models (LLMs)" },
+  { test: /what is agentic ai|agentic ai and how does it work/i, folder: "What Is Agentic AI and How Does It Work" },
+  { test: /hallucination/i, folder: "What Is AI Hallucination and Why Does It Happen" },
+  { test: /context engineering/i, folder: "What Is Context Engineering" },
+  { test: /what is generative ai/i, folder: "What Is Generative AI Real-World Applications Explained" },
+  { test: /model context protocol|\bmcp\b/i, folder: "What Is Model Context Protocol (MCP)" },
+  { test: /multi-agent ai|multi agent ai/i, folder: "What Is Multi-Agent AI" },
+  { test: /prompt engineering/i, folder: "What Is Prompt Engineering" },
+  { test: /retrieval-augmented|\brag\b/i, folder: "What Is Retrieval-Augmented Generation (RAG)" },
+  { test: /40 interview questions|interview questions asked by us/i, folder: "AI Engineer Interview Questions Asked by US Companies" },
+  { test: /agentic ai engineer interview/i, folder: "Agentic AI Engineer Interview Questions" },
+  { test: /generative ai engineer interview/i, folder: "Generative AI Engineer Interview Questions" },
+  { test: /build an ai portfolio/i, folder: "How to Build an AI Portfolio That Gets Recruiters' Attention" },
+  { test: /explain ai projects/i, folder: "How to Explain AI Projects in a Job Interview" },
+  { test: /ai engineer resume/i, folder: "How to Write an AI Engineer Resume for US Jobs" },
+  { test: /employers look for in ai portfolio/i, folder: "What Do US Employers Look for in AI Portfolios" },
+  { test: /candidates get rejected/i, folder: "Why AI Candidates Get Rejected in Technical Interviews" },
+  { test: /f-1 students|career opportunities for f-1/i, folder: "AI Career Opportunities for F-1 Students" },
+  { test: /cpt and opt|cpt\/opt/i, folder: "AI Jobs in the USA CPT and OPT Considerations" },
+  { test: /best ai certification/i, folder: "Best AI Certifications Recognised by US Employers" },
+  { test: /stem opt/i, folder: "Can AI Students Qualify for STEM OPT" },
+  { test: /international students get ai jobs/i, folder: "Can International Students Get AI Jobs in the USA" },
+  { test: /certification worth it/i, folder: "Is an AI Certification Worth It in the USA" },
+  { test: /master.?s in ai vs|industry projects/i, folder: "Master's in AI vs. Learning AI Through Industry Projects" },
+  { test: /international students choose ai/i, folder: "Should International Students Choose AI as a Career" },
 ];
 
 const COVER_HINTS: { test: RegExp; cover: RegExp }[] = [
@@ -58,6 +95,42 @@ const ARTICLE_COVER_HINTS: { test: RegExp; cover: RegExp }[] = [
   { test: /companies are hiring|hiring ai engineers/i, cover: /which us companies are hiring/i },
   { test: /good career choice|career choice in the usa/i, cover: /ai career choice in the usa/i },
   { test: /non-it|non it/i, cover: /from non-it to ai career/i },
+  { test: /mba graduate/i, cover: /mba graduates/i },
+  { test: /finance professional/i, cover: /finance professionals/i },
+  { test: /marketing professional/i, cover: /marketing careers/i },
+  { test: /healthcare/i, cover: /healthcare/i },
+  { test: /traditional office jobs/i, cover: /office jobs/i },
+  { test: /ai product manager/i, cover: /product manager/i },
+  { test: /agents vs\.?\s*chatbots|ai agents vs/i, cover: /agents vs\.? chatbots/i },
+  { test: /fine-tuning vs|fine tuning vs/i, cover: /fine-tuning vs\.? rag/i },
+  { test: /generative ai vs\.?\s*agentic/i, cover: /generative ai vs\.? agentic/i },
+  { test: /agents used in enterprise/i, cover: /agents in enterprise/i },
+  { test: /agents make decisions/i, cover: /agents make decisions/i },
+  { test: /large language models/i, cover: /large language models/i },
+  { test: /what is agentic ai|agentic ai and how does it work/i, cover: /what is agentic ai/i },
+  { test: /hallucination/i, cover: /hallucination/i },
+  { test: /context engineering/i, cover: /context engineering/i },
+  { test: /what is generative ai/i, cover: /generative ai applications/i },
+  { test: /model context protocol|\bmcp\b/i, cover: /model context protocol/i },
+  { test: /multi-agent ai|multi agent ai/i, cover: /multi-agent ai/i },
+  { test: /prompt engineering/i, cover: /prompt engineering/i },
+  { test: /retrieval-augmented generation|\brag\b/i, cover: /retrieval-augmented generation/i },
+  { test: /40 interview questions|interview questions asked by us/i, cover: /ai engineer interview questions/i },
+  { test: /agentic ai engineer interview/i, cover: /agentic ai engineer interview/i },
+  { test: /generative ai engineer interview/i, cover: /generative ai engineer interview/i },
+  { test: /build an ai portfolio/i, cover: /portfolio that gets attention/i },
+  { test: /explain ai projects/i, cover: /explaining ai projects/i },
+  { test: /ai engineer resume/i, cover: /ai engineer resume/i },
+  { test: /employers look for in ai portfolio/i, cover: /employers seek in ai portfolios|value ai/i },
+  { test: /candidates get rejected/i, cover: /candidates get rejected/i },
+  { test: /f-1 students|career opportunities for f-1/i, cover: /f-1 students/i },
+  { test: /cpt and opt|cpt\/opt/i, cover: /cpt and opt/i },
+  { test: /best ai certification/i, cover: /certifications recognized|certifications recognised/i },
+  { test: /stem opt/i, cover: /stem opt/i },
+  { test: /international students get ai jobs/i, cover: /international students get ai jobs/i },
+  { test: /certification worth it/i, cover: /value ai certifications|certification/i },
+  { test: /master.?s in ai vs|industry projects/i, cover: /master.?s in ai vs/i },
+  { test: /international students choose ai/i, cover: /careers for international students/i },
 ];
 
 const TOPIC_RULES: { test: RegExp; topic: BlogFilter }[] = [
@@ -97,6 +170,7 @@ type ArticleFile = {
   source: string;
   kind: ContentKind;
   category: string;
+  categoryOrder: number;
 };
 
 export function guideSlugs() {
@@ -104,13 +178,17 @@ export function guideSlugs() {
 }
 
 export function getArticleCategories() {
-  return Array.from(
-    new Set(
-      contentFiles()
-        .filter((article) => article.kind === "article" && article.category)
-        .map((article) => article.category),
-    ),
-  ).sort((left, right) => left.localeCompare(right, undefined, { numeric: true }));
+  const byCategory = new Map<string, number>();
+  for (const article of contentFiles()) {
+    if (article.kind !== "article" || !article.category) continue;
+    const current = byCategory.get(article.category);
+    if (current === undefined || article.categoryOrder < current) {
+      byCategory.set(article.category, article.categoryOrder);
+    }
+  }
+  return [...byCategory.entries()]
+    .sort((left, right) => left[1] - right[1] || left[0].localeCompare(right[0]))
+    .map(([category]) => category);
 }
 
 export function getGuide(slug: string): GuideDocument | null {
@@ -140,6 +218,8 @@ export function getBlogGuides(): BlogGuide[] {
   const roadmapFolders = assignByHint(roadmapOnly(), thumbnailFolders(), FOLDER_HINTS);
   const articleFolders = assignByHint(articleOnly(), articleImageFolders(), ARTICLE_FOLDER_HINTS);
 
+  const orderBySlug = new Map(articles.map((article) => [article.slug, article.categoryOrder]));
+
   return articles
     .map((article) => {
       const isArticle = article.kind === "article";
@@ -166,9 +246,10 @@ export function getBlogGuides(): BlogGuide[] {
     .sort((left, right) => {
       if (left.kind !== right.kind) return left.kind === "roadmap" ? -1 : 1;
       if (left.kind === "article") {
-        const categoryCompare = (left.category ?? "").localeCompare(right.category ?? "", undefined, {
-          numeric: true,
-        });
+        const leftOrder = orderBySlug.get(left.id) ?? 999;
+        const rightOrder = orderBySlug.get(right.id) ?? 999;
+        if (leftOrder !== rightOrder) return leftOrder - rightOrder;
+        const categoryCompare = (left.category ?? "").localeCompare(right.category ?? "");
         if (categoryCompare !== 0) return categoryCompare;
       }
       return cardRank(left.title) - cardRank(right.title) || left.title.localeCompare(right.title);
@@ -194,7 +275,7 @@ function readMarkdownDir(directory: string, fallbackKind: ContentKind): ArticleF
     .filter((fileName) => fileName.endsWith(".md"))
     .map((fileName) => {
       const raw = fs.readFileSync(path.join(directory, fileName), "utf8");
-      const { source, kind, category } = splitFrontmatter(raw, fallbackKind);
+      const { source, kind, category, categoryOrder } = splitFrontmatter(raw, fallbackKind);
       const guide = parseGuideMarkdown(source);
       return {
         slug: fileName.replace(/\.md$/i, ""),
@@ -202,7 +283,8 @@ function readMarkdownDir(directory: string, fallbackKind: ContentKind): ArticleF
         metaDescription: guide.metaDescription || preambleExcerpt(source),
         source,
         kind,
-        category,
+        category: stripCategoryNumber(category),
+        categoryOrder,
       };
     });
 }
@@ -211,12 +293,13 @@ function splitFrontmatter(raw: string, fallbackKind: ContentKind) {
   const text = raw.replace(/^\uFEFF/, "");
   const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?/);
   if (!match) {
-    return { source: text, kind: fallbackKind, category: "" };
+    return { source: text, kind: fallbackKind, category: "", categoryOrder: 999 };
   }
 
   const meta = match[1];
   const kindMatch = meta.match(/^kind:\s*(\w+)\s*$/m);
   const categoryMatch = meta.match(/^category:\s*(.+)\s*$/m);
+  const orderMatch = meta.match(/^categoryOrder:\s*(\d+)\s*$/m);
   const kind = kindMatch?.[1] === "article" || kindMatch?.[1] === "roadmap" ? kindMatch[1] : fallbackKind;
   let category = "";
   if (categoryMatch) {
@@ -226,12 +309,23 @@ function splitFrontmatter(raw: string, fallbackKind: ContentKind) {
       category = categoryMatch[1].trim().replace(/^["']|["']$/g, "");
     }
   }
+  const inferredOrder = category.match(/^(\d+)\.\s*/);
+  const categoryOrder = orderMatch
+    ? Number(orderMatch[1])
+    : inferredOrder
+      ? Number(inferredOrder[1])
+      : 999;
 
   return {
     source: text.slice(match[0].length),
     kind,
     category,
+    categoryOrder,
   };
+}
+
+function stripCategoryNumber(value: string) {
+  return value.replace(/^\d+\.\s*/, "").trim();
 }
 
 function thumbnailFolders() {

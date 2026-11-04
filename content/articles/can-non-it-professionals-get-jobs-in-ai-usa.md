@@ -1,6 +1,7 @@
 ---
 kind: article
-category: "2. AI Careers for Non-Technical Professionals"
+category: "AI Careers for Non-Technical Professionals"
+categoryOrder: 2
 ---
 
 # **Can Non-IT Professionals Get Jobs in AI? Career Opportunities in the USA in 2027**

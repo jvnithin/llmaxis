@@ -1,6 +1,7 @@
 ---
 kind: article
-category: "1. AI Careers & US Job Market"
+category: "AI Careers & US Job Market"
+categoryOrder: 1
 ---
 
 # **AI Jobs in the USA: Skills Employers Actually Want in 2027**

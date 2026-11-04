@@ -1,6 +1,7 @@
 ---
 kind: article
-category: "1. AI Careers & US Job Market"
+category: "AI Careers & US Job Market"
+categoryOrder: 1
 ---
 
 # **Is the AI Job Market Growing in the USA? 2027 Outlook, Hiring Trends and Industry Data**

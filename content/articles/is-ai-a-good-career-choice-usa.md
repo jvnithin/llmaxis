@@ -1,6 +1,7 @@
 ---
 kind: article
-category: "1. AI Careers & US Job Market"
+category: "AI Careers & US Job Market"
+categoryOrder: 1
 ---
 
 # **Is AI a Good Career Choice in the USA in 2027? Job Opportunities, Salaries and Future Outlook**

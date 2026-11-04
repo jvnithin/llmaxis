@@ -1,6 +1,7 @@
 ---
 kind: article
-category: "1. AI Careers & US Job Market"
+category: "AI Careers & US Job Market"
+categoryOrder: 1
 ---
 
 # **Top 10 AI Jobs in the USA in 2027: Salaries, Skills and Career Opportunities**
