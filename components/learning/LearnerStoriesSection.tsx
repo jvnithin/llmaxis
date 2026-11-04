@@ -74,7 +74,6 @@ function StoryCard({
         <span className="stories-avatar" aria-hidden="true">
           {story.initials}
         </span>
-        <time className="stories-time">{story.time}</time>
       </div>
       <div className="stories-card-identity">
         <strong>{story.name}</strong>
