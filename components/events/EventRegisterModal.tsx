@@ -132,65 +132,68 @@ export default function EventRegisterModal({
   const defaultKeyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "";
 
   const fetchPricing = useCallback(async (countryName: string, countryCode?: string) => {
+    // Static export (`output: "export"`) has no live API routes — always quote on the client
+    // first so country → currency works in production. API is an optional enhancement.
     try {
-      // POST — GET searchParams are ignored under output: "export" + force-static.
-      const res = await fetch("/api/pricing/country", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          country: countryName,
-          countryCode: countryCode || undefined,
-        }),
+      const local = await quoteEventPrice({
+        countryCode: countryCode || undefined,
+        countryName,
       });
-      const contentType = res.headers.get("content-type") || "";
-      const data = contentType.includes("application/json") ? await res.json() : null;
-      if (!res.ok || !data?.success) {
-        throw new Error(data?.error || "Unable to load pricing");
-      }
       const quote: PricingQuote = {
-        currency: data.currency,
-        amountMinor: data.amountMinor,
-        amountMajor: data.amountMajor,
-        formattedPrice: data.formattedPrice,
-        countryCode: data.country?.code || countryCode || "IN",
-        countryName: data.country?.name || countryName,
-        taxableAmountMajor: data.taxableAmountMajor,
-        gstRate: data.gstRate,
-        gstAmountMajor: data.gstAmountMajor,
-        includesGst: Boolean(data.includesGst),
+        currency: local.currency,
+        amountMinor: local.amountMinor,
+        amountMajor: local.amountMajor,
+        formattedPrice: local.formattedPrice,
+        countryCode: local.countryCode,
+        countryName: local.countryName,
+        taxableAmountMajor: local.taxableAmountMajor,
+        gstRate: local.gstRate,
+        gstAmountMajor: local.gstAmountMajor,
+        includesGst: local.includesGst,
       };
       setPricing(quote);
-      return {
-        quote,
-        detected: data.detected as
-          | { countryCode?: string; countryName?: string }
-          | undefined,
-      };
-    } catch (err) {
-      console.error("Pricing API unavailable, using client FX quote:", err);
+
+      // Best-effort server quote (works in `next dev` only with static export).
       try {
-        const local = await quoteEventPrice({
-          countryCode: countryCode || undefined,
-          countryName,
+        const res = await fetch("/api/pricing/country", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            country: countryName,
+            countryCode: countryCode || undefined,
+          }),
         });
-        const quote: PricingQuote = {
-          currency: local.currency,
-          amountMinor: local.amountMinor,
-          amountMajor: local.amountMajor,
-          formattedPrice: local.formattedPrice,
-          countryCode: local.countryCode,
-          countryName: local.countryName,
-          taxableAmountMajor: local.taxableAmountMajor,
-          gstRate: local.gstRate,
-          gstAmountMajor: local.gstAmountMajor,
-          includesGst: local.includesGst,
-        };
-        setPricing(quote);
-        return { quote, detected: undefined };
-      } catch (localErr) {
-        console.error("Client pricing fallback failed:", localErr);
-        return null;
+        const contentType = res.headers.get("content-type") || "";
+        const data = contentType.includes("application/json") ? await res.json() : null;
+        if (res.ok && data?.success && data.currency && data.amountMinor) {
+          const serverQuote: PricingQuote = {
+            currency: data.currency,
+            amountMinor: data.amountMinor,
+            amountMajor: data.amountMajor,
+            formattedPrice: data.formattedPrice,
+            countryCode: data.country?.code || countryCode || local.countryCode,
+            countryName: data.country?.name || countryName,
+            taxableAmountMajor: data.taxableAmountMajor,
+            gstRate: data.gstRate,
+            gstAmountMajor: data.gstAmountMajor,
+            includesGst: Boolean(data.includesGst),
+          };
+          setPricing(serverQuote);
+          return {
+            quote: serverQuote,
+            detected: data.detected as
+              | { countryCode?: string; countryName?: string }
+              | undefined,
+          };
+        }
+      } catch {
+        // ignore — client quote already applied
       }
+
+      return { quote, detected: undefined };
+    } catch (localErr) {
+      console.error("Client pricing failed:", localErr);
+      return null;
     }
   }, []);
 
@@ -302,50 +305,74 @@ export default function EventRegisterModal({
         (await fetchPricing(form.country, countryMeta?.code))?.quote ||
         null;
 
-      // Always create a server-side order so amount/currency cannot be client-tampered.
-      const res = await fetch("/api/events/create-order", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: form.name.trim(),
-          email: form.email.trim(),
-          country: form.country,
-          countryCode: countryMeta?.code,
-          phone: formattedPhone,
-          event: eventName,
-        }),
-      });
+      // Prefer server order when APIs exist (`next dev`). Static export hosts have no
+      // /api routes — fall back to client quote + Razorpay checkout without order_id.
+      let amountFormatted = pricingResult?.formattedPrice || "";
+      let orderCurrency = pricingResult?.currency || "USD";
+      let orderAmount = pricingResult?.amountMinor || 0;
+      let amountMajor = pricingResult?.amountMajor || 0;
+      let backendOrderId = "";
+      let backendKeyId = defaultKeyId;
+      let serverOrderOk = false;
 
-      const contentType = res.headers.get("content-type") || "";
-      const data =
-        contentType.includes("application/json") ? await res.json() : null;
-
-      if (!res.ok || !data?.success || !data.orderId) {
-        throw new Error(data?.error || "Unable to create payment order. Please try again.");
+      try {
+        const res = await fetch("/api/events/create-order", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: form.name.trim(),
+            email: form.email.trim(),
+            country: form.country,
+            countryCode: countryMeta?.code,
+            phone: formattedPhone,
+            event: eventName,
+          }),
+        });
+        const contentType = res.headers.get("content-type") || "";
+        const data =
+          contentType.includes("application/json") ? await res.json() : null;
+        if (res.ok && data?.success && data.orderId) {
+          serverOrderOk = true;
+          amountFormatted = data.priceFormatted || amountFormatted;
+          orderCurrency = data.currency || orderCurrency;
+          orderAmount = data.amount || orderAmount;
+          amountMajor = data.amountMajor ?? amountMajor;
+          backendOrderId = data.orderId as string;
+          backendKeyId = data.keyId || backendKeyId;
+        }
+      } catch {
+        // static host / network — use client quote
       }
 
-      const amountFormatted =
-        data.priceFormatted || pricingResult?.formattedPrice || "";
-      const orderCurrency = data.currency;
-      const orderAmount = data.amount;
-      const backendOrderId = data.orderId as string;
-      const backendKeyId = data.keyId || defaultKeyId;
+      if (!serverOrderOk) {
+        if (!pricingResult?.amountMinor || !pricingResult.currency) {
+          throw new Error("Unable to resolve payment amount for this country. Please try again.");
+        }
+        amountFormatted = pricingResult.formattedPrice;
+        orderCurrency = pricingResult.currency;
+        orderAmount = pricingResult.amountMinor;
+        amountMajor = pricingResult.amountMajor;
+      }
 
       if (!backendKeyId) {
         throw new Error("Razorpay key is not configured.");
+      }
+
+      if (!orderAmount || orderAmount < 1) {
+        throw new Error("Invalid payment amount. Please reselect your country and try again.");
       }
 
       trackFbEvent("Lead", {
         content_name: eventName,
         content_category: "Registration",
         currency: orderCurrency,
-        value: data.amountMajor ?? pricingResult?.amountMajor ?? 0,
+        value: amountMajor,
       });
 
       trackFbEvent("InitiateCheckout", {
         content_name: eventName,
         currency: orderCurrency,
-        value: data.amountMajor ?? pricingResult?.amountMajor ?? 0,
+        value: amountMajor,
         num_items: 1,
       });
 
@@ -355,7 +382,7 @@ export default function EventRegisterModal({
         country: form.country,
         phone: formattedPhone,
         paymentStatus: "Pending",
-        orderId: backendOrderId,
+        orderId: backendOrderId || "client_checkout",
         amount: amountFormatted,
         event: eventName,
       });
@@ -371,7 +398,6 @@ export default function EventRegisterModal({
         key: backendKeyId,
         amount: orderAmount,
         currency: orderCurrency,
-        order_id: backendOrderId,
         name: "LLM Axis",
         description: itemDescription,
         image: "/logo.jpeg",
@@ -398,7 +424,7 @@ export default function EventRegisterModal({
               phone: formattedPhone,
               paymentStatus: "Paid",
               paymentId: response.razorpay_payment_id,
-              orderId: response.razorpay_order_id || backendOrderId,
+              orderId: response.razorpay_order_id || backendOrderId || "client_checkout",
               amount: amountFormatted,
               event: eventName,
             });
@@ -406,11 +432,11 @@ export default function EventRegisterModal({
             trackFbEvent("Purchase", {
               content_name: eventName,
               currency: orderCurrency,
-              value: data.amountMajor ?? pricingResult?.amountMajor ?? 0,
+              value: amountMajor,
               transaction_id: response.razorpay_payment_id,
             });
 
-            if (response.razorpay_signature) {
+            if (response.razorpay_signature && backendOrderId) {
               fetch("/api/events/verify-payment", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -454,13 +480,17 @@ export default function EventRegisterModal({
               country: form.country,
               phone: formattedPhone,
               paymentStatus: "Cancelled",
-              orderId: backendOrderId,
+              orderId: backendOrderId || "client_checkout",
               amount: amountFormatted,
               event: eventName,
             });
           },
         },
       };
+
+      if (backendOrderId) {
+        options.order_id = backendOrderId;
+      }
 
       const razorpayInstance = new (window as unknown as {
         Razorpay: new (opts: Record<string, unknown>) => {

@@ -1,6 +1,10 @@
 import { countries, getCountry, type Country } from "@/lib/countries";
 
-/** Currencies Razorpay commonly supports for international checkout. */
+/**
+ * Currencies we attempt at Razorpay checkout.
+ * Unsupported ones fall back to USD after conversion for display+charge consistency.
+ * @see https://razorpay.com/docs/payments/international-payments/
+ */
 export const RAZORPAY_CURRENCIES = new Set([
   "INR",
   "USD",
@@ -11,35 +15,218 @@ export const RAZORPAY_CURRENCIES = new Set([
   "SGD",
   "AED",
   "MYR",
+  "SAR",
+  "QAR",
+  "KWD",
+  "BHD",
+  "OMR",
+  "HKD",
+  "JPY",
+  "NZD",
+  "CHF",
+  "SEK",
+  "NOK",
+  "DKK",
+  "ZAR",
+  "THB",
+  "PHP",
+  "IDR",
+  "BDT",
+  "PKR",
+  "LKR",
+  "NPR",
+  "EGP",
+  "NGN",
+  "KES",
+  "GHS",
+  "MXN",
+  "BRL",
+  "TRY",
+  "PLN",
+  "CZK",
+  "HUF",
+  "RON",
+  "ILS",
+  "CNY",
+  "TWD",
+  "KRW",
+  "VND",
+  // Local currencies for remaining countries in the enroll list
+  // (must be on Razorpay's supported-currency table)
+  "ALL",
+  "DZD",
+  "CLP",
+  "COP",
+  "ETB",
+  "IQD",
+  "JOD",
+  "MAD",
+  "MMK",
+  "RUB",
+  "TZS",
+  "UGX",
+  "UAH",
+  "YER",
 ]);
 
-/** ISO country → preferred checkout currency */
+/**
+ * ISO country → checkout currency (one entry per country in lib/countries.ts).
+ * Prefer the national currency when Razorpay supports it.
+ * AF/AR/IR → USD: AFN, ARS, IRR are not on Razorpay's supported list.
+ * ZW → USD: widely used for payments in Zimbabwe.
+ * Only eurozone members use EUR.
+ */
 const COUNTRY_CURRENCY: Record<string, string> = {
   IN: "INR",
   US: "USD",
   GB: "GBP",
   CA: "CAD",
   AU: "AUD",
-  DE: "EUR",
-  FR: "EUR",
-  IT: "EUR",
-  ES: "EUR",
-  NL: "EUR",
-  IE: "EUR",
-  BE: "EUR",
-  AT: "EUR",
-  PT: "EUR",
-  FI: "EUR",
-  GR: "EUR",
   AE: "AED",
   SG: "SGD",
+  DE: "EUR",
+  AF: "USD", // AFN not supported by Razorpay
+  AL: "ALL",
+  DZ: "DZD",
+  AR: "USD", // ARS not supported by Razorpay
+  AT: "EUR",
+  BD: "BDT",
+  BE: "EUR",
+  BR: "BRL",
+  CL: "CLP",
+  CN: "CNY",
+  CO: "COP",
+  DK: "DKK",
+  EG: "EGP",
+  ET: "ETB",
+  FI: "EUR",
+  FR: "EUR",
+  GH: "GHS",
+  GR: "EUR",
+  HK: "HKD",
+  HU: "HUF",
+  ID: "IDR",
+  IR: "USD", // IRR not supported by Razorpay
+  IQ: "IQD",
+  IE: "EUR",
+  IL: "ILS",
+  IT: "EUR",
+  JP: "JPY",
+  JO: "JOD",
+  KE: "KES",
+  KW: "KWD",
   MY: "MYR",
-  NZ: "AUD",
+  MX: "MXN",
+  MA: "MAD",
+  MM: "MMK",
+  NP: "NPR",
+  NL: "EUR",
+  NZ: "NZD",
+  NG: "NGN",
+  NO: "NOK",
+  OM: "OMR",
+  PK: "PKR",
+  PH: "PHP",
+  PL: "PLN",
+  PT: "EUR",
+  QA: "QAR",
+  RO: "RON",
+  RU: "RUB",
+  SA: "SAR",
+  ZA: "ZAR",
+  KR: "KRW",
+  ES: "EUR",
+  LK: "LKR",
+  SE: "SEK",
+  CH: "CHF",
+  TW: "TWD",
+  TZ: "TZS",
+  TH: "THB",
+  TR: "TRY",
+  UG: "UGX",
+  UA: "UAH",
+  VN: "VND",
+  YE: "YER",
+  ZW: "USD",
 };
 
-const ZERO_DECIMAL = new Set(["JPY", "KRW"]);
+/**
+ * Approximate units of target currency per 1 USD.
+ * Used when live FX is unavailable (static export / blocked network).
+ * Override anytime with NEXT_PUBLIC_EVENT_FX_RATES / EVENT_FX_RATES.
+ */
+const DEFAULT_FX_FROM_USD: Record<string, number> = {
+  USD: 1,
+  INR: 83.5,
+  EUR: 0.92,
+  GBP: 0.79,
+  AUD: 1.52,
+  CAD: 1.36,
+  SGD: 1.34,
+  AED: 3.67,
+  MYR: 4.47,
+  SAR: 3.75,
+  QAR: 3.64,
+  KWD: 0.31,
+  BHD: 0.38,
+  OMR: 0.385,
+  JOD: 0.709,
+  HKD: 7.82,
+  JPY: 149,
+  NZD: 1.66,
+  CHF: 0.88,
+  SEK: 10.4,
+  NOK: 10.6,
+  DKK: 6.85,
+  ZAR: 18.2,
+  THB: 35.5,
+  PHP: 56.5,
+  IDR: 15800,
+  BDT: 110,
+  PKR: 278,
+  LKR: 305,
+  NPR: 133,
+  EGP: 49,
+  NGN: 1550,
+  KES: 129,
+  GHS: 15.5,
+  MXN: 17.2,
+  BRL: 5.05,
+  TRY: 32.5,
+  PLN: 3.95,
+  CZK: 23.2,
+  HUF: 360,
+  RON: 4.57,
+  ILS: 3.7,
+  CNY: 7.25,
+  TWD: 32.2,
+  KRW: 1350,
+  VND: 25400,
+  ALL: 92,
+  DZD: 134,
+  CLP: 950,
+  COP: 4000,
+  ETB: 57,
+  IQD: 1310,
+  MAD: 10.1,
+  MMK: 2100,
+  RUB: 92,
+  TZS: 2550,
+  UGX: 3750,
+  UAH: 41,
+  YER: 250,
+};
 
-/** India-only GST on taxable program fees (CGST+SGST / IGST total). */
+/**
+ * Razorpay minor-unit exponents — must match
+ * https://razorpay.com/docs/payments/international-payments/#supported-currencies
+ */
+const ZERO_DECIMAL = new Set(["JPY", "KRW", "VND", "CLP", "UGX"]);
+
+/** Dinars that use 3 decimal places (fils / fills). */
+const THREE_DECIMAL = new Set(["KWD", "BHD", "OMR", "JOD", "IQD"]);
+
+/** India-only GST on taxable program fees. */
 export const INDIA_GST_RATE = 0.18;
 
 export function baseEventPrice(): number {
@@ -48,26 +235,33 @@ export function baseEventPrice(): number {
 }
 
 export function baseEventCurrency(): string {
-  const raw = (process.env.EVENT_CURRENCY || process.env.NEXT_PUBLIC_EVENT_CURRENCY || "INR")
+  const raw = (process.env.EVENT_CURRENCY || process.env.NEXT_PUBLIC_EVENT_CURRENCY || "USD")
     .trim()
     .toUpperCase();
-  return raw || "INR";
+  return raw || "USD";
 }
 
 export function fallbackCurrency(): string {
-  const raw = (process.env.EVENT_FALLBACK_CURRENCY || "USD").trim().toUpperCase();
+  const raw = (
+    process.env.EVENT_FALLBACK_CURRENCY ||
+    process.env.NEXT_PUBLIC_EVENT_FALLBACK_CURRENCY ||
+    "USD"
+  )
+    .trim()
+    .toUpperCase();
   return RAZORPAY_CURRENCIES.has(raw) ? raw : "USD";
 }
 
 export function currencyExponent(currency: string): number {
-  return ZERO_DECIMAL.has(currency.toUpperCase()) ? 0 : 2;
+  const code = currency.toUpperCase();
+  if (ZERO_DECIMAL.has(code)) return 0;
+  if (THREE_DECIMAL.has(code)) return 3;
+  return 2;
 }
 
 export function currencyForCountryCode(countryCode: string | null | undefined): string {
   const code = (countryCode || "").toUpperCase();
-  const mapped = COUNTRY_CURRENCY[code];
-  if (mapped && RAZORPAY_CURRENCIES.has(mapped)) return mapped;
-  return fallbackCurrency();
+  return COUNTRY_CURRENCY[code] || fallbackCurrency();
 }
 
 export function currencyForCountryName(countryName: string): string {
@@ -80,10 +274,10 @@ export function getCountryByCode(code: string): Country | null {
   return countries.find((c) => c.code === upper) ?? null;
 }
 
-/** Parse EVENT_FX_RATES like "USD:0.012,GBP:0.0095,EUR:0.011" (units of that currency per 1 base unit). */
+/** Parse EVENT_FX_RATES like "INR:83.5,GBP:0.79" as units of that currency per 1 base unit. */
 export function parseEnvFxRates(): Record<string, number> {
   const raw =
-    process.env.EVENT_FX_RATES || process.env.NEXT_PUBLIC_EVENT_FX_RATES || "";
+    process.env.NEXT_PUBLIC_EVENT_FX_RATES || "";
   const out: Record<string, number> = {};
   for (const part of raw.split(",")) {
     const [code, value] = part.split(":").map((s) => s.trim());
@@ -102,7 +296,6 @@ async function fetchLiveRates(base: string): Promise<Record<string, number>> {
   const targets = [...RAZORPAY_CURRENCIES].filter((c) => c !== base).join(",");
   if (!targets) return {};
   const url = `https://api.frankfurter.app/latest?from=${encodeURIComponent(base)}&to=${encodeURIComponent(targets)}`;
-  // `next.revalidate` is server-only; browser fallback uses a plain fetch.
   const res = await fetch(
     url,
     typeof window === "undefined" ? { next: { revalidate: 3600 } } : undefined,
@@ -112,13 +305,35 @@ async function fetchLiveRates(base: string): Promise<Record<string, number>> {
   return data.rates || {};
 }
 
+function bakedRateFromUsd(currency: string): number | null {
+  const rate = DEFAULT_FX_FROM_USD[currency.toUpperCase()];
+  return rate && rate > 0 ? rate : null;
+}
+
+/** Convert amount in `from` currency to `to` using USD as the bridge when needed. */
+function convertViaBakedUsd(amount: number, from: string, to: string): number | null {
+  const src = from.toUpperCase();
+  const dst = to.toUpperCase();
+  if (src === dst) return amount;
+
+  const srcUsd = bakedRateFromUsd(src);
+  const dstUsd = bakedRateFromUsd(dst);
+  if (!srcUsd || !dstUsd) return null;
+
+  // amount is in `from`; 1 USD = srcUsd units of from → amount/srcUsd USD → * dstUsd
+  return (amount / srcUsd) * dstUsd;
+}
+
 export async function getFxRate(base: string, target: string): Promise<number> {
   const from = base.toUpperCase();
   const to = target.toUpperCase();
   if (from === to) return 1;
 
   const envRates = parseEnvFxRates();
-  if (envRates[to]) return envRates[to];
+  // Env rates are "per 1 base unit" when base matches EVENT_CURRENCY.
+  if (envRates[to] && from === baseEventCurrency().toUpperCase()) {
+    return envRates[to];
+  }
 
   const now = Date.now();
   if (!fxCache || fxCache.base !== from || now - fxCache.at > FX_TTL_MS) {
@@ -127,18 +342,28 @@ export async function getFxRate(base: string, target: string): Promise<number> {
       fxCache = { at: now, base: from, rates: { ...envRates, ...rates } };
     } catch (err) {
       console.error("FX fetch failed:", err);
-      if (fxCache?.base === from) {
-        // keep stale cache
-      } else {
-        fxCache = { at: now, base: from, rates: envRates };
+      if (fxCache?.base !== from) {
+        fxCache = { at: now, base: from, rates: { ...envRates } };
       }
     }
   }
 
-  const rate = fxCache?.rates[to];
-  if (rate && rate > 0) return rate;
+  const live = fxCache?.rates[to];
+  if (live && live > 0) return live;
 
-  throw new Error(`No FX rate available for ${from} → ${to}. Set EVENT_FX_RATES.`);
+  // Baked USD bridge (works offline / on static hosts).
+  if (from === "USD") {
+    const baked = bakedRateFromUsd(to);
+    if (baked) return baked;
+  }
+  if (to === "USD") {
+    const baked = bakedRateFromUsd(from);
+    if (baked) return 1 / baked;
+  }
+  const bridged = convertViaBakedUsd(1, from, to);
+  if (bridged && bridged > 0) return bridged;
+
+  throw new Error(`No FX rate available for ${from} → ${to}. Set NEXT_PUBLIC_EVENT_FX_RATES.`);
 }
 
 export function toMinorUnits(major: number, currency: string): number {
@@ -155,16 +380,19 @@ export function fromMinorUnits(minor: number, currency: string): number {
 
 export function formatMoney(major: number, currency: string): string {
   const code = currency.toUpperCase();
+  const exp = currencyExponent(code);
   try {
-    return new Intl.NumberFormat("en", {
+    // Prefer ISO code in the string so CAD/AUD/HKD/SGD/$ lookalikes are unambiguous.
+    const formatted = new Intl.NumberFormat("en", {
       style: "currency",
       currency: code,
-      currencyDisplay: code === "AUD" || code === "CAD" ? "symbol" : "narrowSymbol",
-      minimumFractionDigits: currencyExponent(code),
-      maximumFractionDigits: currencyExponent(code),
+      currencyDisplay: "code",
+      minimumFractionDigits: exp,
+      maximumFractionDigits: exp,
     }).format(major);
+    return formatted;
   } catch {
-    return `${code} ${major.toFixed(currencyExponent(code))}`;
+    return `${code} ${major.toFixed(exp)}`;
   }
 }
 
@@ -178,8 +406,7 @@ export type EventPriceQuote = {
   baseCurrency: string;
   baseAmountMajor: number;
   fxRate: number;
-  pricingSource: "base" | "fx_env" | "fx_live" | "fallback";
-  /** Amount before India GST (same as amountMajor when GST does not apply). */
+  pricingSource: "base" | "fx_env" | "fx_live" | "fx_baked" | "fallback";
   taxableAmountMajor: number;
   gstRate: number;
   gstAmountMajor: number;
@@ -208,11 +435,8 @@ export async function quoteEventPrice(input: {
 
   const countryCode = country?.code || "US";
   const countryName = country?.name || "International";
-  let currency = currencyForCountryCode(countryCode);
-
-  if (!RAZORPAY_CURRENCIES.has(currency)) {
-    currency = fallbackCurrency();
-  }
+  // Always quote in the country's real local currency (never silently swap to USD/EUR).
+  const currency = currencyForCountryCode(countryCode);
 
   if (currency === baseCurrency) {
     return finalizeQuote({
@@ -235,22 +459,34 @@ export async function quoteEventPrice(input: {
   let fxRate: number;
   try {
     fxRate = await getFxRate(baseCurrency, currency);
+    if (!envRates[currency] && pricingSource === "fx_live") {
+      const usedBaked =
+        !fxCache?.rates[currency] &&
+        (baseCurrency.toUpperCase() === "USD"
+          ? Boolean(bakedRateFromUsd(currency))
+          : Boolean(convertViaBakedUsd(1, baseCurrency, currency)));
+      if (usedBaked) pricingSource = "fx_baked";
+    }
   } catch {
-    currency = fallbackCurrency();
-    if (currency === baseCurrency) {
+    // Keep local currency — convert via baked USD table instead of switching to dollars.
+    const bridged = convertViaBakedUsd(baseAmountMajor, baseCurrency, currency);
+    if (bridged && bridged > 0) {
+      const exp = currencyExponent(currency);
+      const taxable = Math.round(bridged * 10 ** exp) / 10 ** exp;
       return finalizeQuote({
         countryCode,
         countryName,
         currency,
-        taxableAmountMajor: baseAmountMajor,
+        taxableAmountMajor: taxable,
         baseCurrency,
         baseAmountMajor,
-        fxRate: 1,
-        pricingSource: "fallback",
+        fxRate: taxable / baseAmountMajor,
+        pricingSource: "fx_baked",
       });
     }
-    fxRate = await getFxRate(baseCurrency, currency);
-    pricingSource = "fallback";
+    throw new Error(
+      `Unable to price ${currency} for ${countryName}. Add ${currency} to NEXT_PUBLIC_EVENT_FX_RATES.`,
+    );
   }
 
   const taxableAmountMajor =
@@ -309,7 +545,7 @@ function finalizeQuote(input: {
   };
 }
 
-/** @deprecated Prefer quoteEventPrice — kept for sheet helpers that need a quick format. */
+/** @deprecated Prefer quoteEventPrice */
 export function eventPrice() {
   return baseEventPrice();
 }
