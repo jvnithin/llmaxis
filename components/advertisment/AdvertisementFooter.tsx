@@ -3,16 +3,17 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Send, Sparkles, CheckCircle2 } from "lucide-react";
+import { Send, Sparkles } from "lucide-react";
+import { useToast } from "@/components/ui/toast";
 
 export default function AdvertisementFooter() {
+  const toast = useToast();
   const [email, setEmail] = useState("");
-  const [subscribed, setSubscribed] = useState(false);
 
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !email.includes("@")) return;
-    setSubscribed(true);
+    toast.success("Subscribed", "Thanks for joining. We will share AI updates with you.");
     setEmail("");
   };
 
@@ -171,30 +172,23 @@ export default function AdvertisementFooter() {
                 Get the latest on AI programs, hackathons, and global opportunities.
               </p>
 
-              {subscribed ? (
-                <div className="flex items-center gap-2 text-xs font-semibold text-emerald-600 bg-emerald-50 p-2.5 rounded-xl border border-emerald-200">
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>Thank you for subscribing!</span>
-                </div>
-              ) : (
-                <form onSubmit={handleSubscribe} className="relative flex items-center w-full">
-                  <input
-                    type="email"
-                    required
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-white border border-slate-200/90 rounded-full pl-4 pr-12 py-2.5 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-400/40 transition shadow-2xs"
-                  />
-                  <button
-                    type="submit"
-                    aria-label="Subscribe to newsletter"
-                    className="absolute right-1.5 top-1.5 bottom-1.5 w-7 h-7 rounded-full bg-[#7C3AED] hover:bg-[#6D28D9] text-white flex items-center justify-center transition shadow-xs"
-                  >
-                    <Send className="w-3 h-3" />
-                  </button>
-                </form>
-              )}
+              <form onSubmit={handleSubscribe} className="relative flex items-center w-full">
+                <input
+                  type="email"
+                  required
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full bg-white border border-slate-200/90 rounded-full pl-4 pr-12 py-2.5 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-400/40 transition shadow-2xs"
+                />
+                <button
+                  type="submit"
+                  aria-label="Subscribe to newsletter"
+                  className="absolute right-1.5 top-1.5 bottom-1.5 w-7 h-7 rounded-full bg-[#7C3AED] hover:bg-[#6D28D9] text-white flex items-center justify-center transition shadow-xs"
+                >
+                  <Send className="w-3 h-3" />
+                </button>
+              </form>
             </div>
           </div>
         </div>

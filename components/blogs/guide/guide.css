@@ -460,10 +460,14 @@
     white-space: nowrap;
   }
 
-  /* Above the WhatsApp FAB (bottom-right ~20px + 48px). */
+  /*
+   * Stack above the WhatsApp FAB with clear gap.
+   * Mobile WhatsApp: bottom 16px + 48px height → top edge ~64px.
+   * Keep ~20px gap → bottom ≈ 84 was tight; use 100px for breathing room.
+   */
   .guide-mobile-top {
-    right: 20px;
-    bottom: 84px;
+    right: 16px;
+    bottom: 100px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -472,6 +476,7 @@
     border-radius: 999px;
     background: #131b2e;
     color: #fff;
+    z-index: 51;
   }
 
   .guide-mobile-counselling:focus-visible,

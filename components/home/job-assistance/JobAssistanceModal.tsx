@@ -17,6 +17,7 @@ import {
   validateJobAssistanceInquiry,
   type JobAssistanceInquiry,
 } from "@/lib/jobAssistanceInquiry";
+import { useToast } from "@/components/ui/toast";
 import "../business-enquiry/business-enquiry.css";
 import "../partnership/partnership.css";
 
@@ -26,6 +27,7 @@ type JobAssistanceModalProps = {
 };
 
 export default function JobAssistanceModal({ open, onClose }: JobAssistanceModalProps) {
+  const toast = useToast();
   const titleId = useId();
   const onCloseRef = useRef(onClose);
   const detailsRef = useRef<JobAssistanceInquiry>(emptyJobAssistanceInquiry);
@@ -33,7 +35,6 @@ export default function JobAssistanceModal({ open, onClose }: JobAssistanceModal
   const [details, setDetails] = useState<JobAssistanceInquiry>(emptyJobAssistanceInquiry);
   const [errors, setErrors] = useState<Partial<Record<keyof JobAssistanceInquiry, string>>>({});
   const [loading, setLoading] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState("");
   onCloseRef.current = onClose;
   detailsRef.current = details;
@@ -47,7 +48,6 @@ export default function JobAssistanceModal({ open, onClose }: JobAssistanceModal
     setDetails(emptyJobAssistanceInquiry);
     detailsRef.current = emptyJobAssistanceInquiry;
     setErrors({});
-    setSubmitted(false);
     setSubmitError("");
     setLoading(false);
   }, [open]);
@@ -132,14 +132,19 @@ export default function JobAssistanceModal({ open, onClose }: JobAssistanceModal
         content_name: "AI Job Assistance",
         source: "job_assistance",
       });
-      setSubmitted(true);
+      toast.success(
+        "Request received",
+        "Our team will review your details and get in touch.",
+      );
+      setDetails(emptyJobAssistanceInquiry);
+      onClose();
     } catch (error) {
       const message = error instanceof Error ? error.message : "";
-      setSubmitError(
-        message && message !== "Request failed"
-          ? message
-          : "Something went wrong while sending. Please try again.",
-      );
+      const fallback = "Something went wrong while sending. Please try again.";
+      const finalMessage =
+        message && message !== "Request failed" ? message : fallback;
+      setSubmitError(finalMessage);
+      toast.error("Could not send request", finalMessage);
     } finally {
       setLoading(false);
     }
@@ -161,12 +166,8 @@ export default function JobAssistanceModal({ open, onClose }: JobAssistanceModal
         <header className="enquiry-header">
           <div>
             <p className="enquiry-kicker">Career support</p>
-            <h3 id={titleId}>{submitted ? "Request received" : "AI Job Assistance"}</h3>
-            <p>
-              {submitted
-                ? "Our team will review your details and get in touch."
-                : "Share your details and resume so we can help with your job search."}
-            </p>
+            <h3 id={titleId}>AI Job Assistance</h3>
+            <p>Share your details and resume so we can help with your job search.</p>
           </div>
           <button
             type="button"
@@ -181,15 +182,7 @@ export default function JobAssistanceModal({ open, onClose }: JobAssistanceModal
           </button>
         </header>
 
-        {submitted ? (
-          <div className="enquiry-success">
-            <p>Our team will review your details and get in touch.</p>
-            <button type="button" className="enquiry-primary" onClick={onClose}>
-              Done
-            </button>
-          </div>
-        ) : (
-          <form className="enquiry-form" onSubmit={handleSubmit} noValidate>
+        <form className="enquiry-form" onSubmit={handleSubmit} noValidate>
             <div className="enquiry-fields">
               <label>
                 <span className="partnership-label">
@@ -310,7 +303,6 @@ export default function JobAssistanceModal({ open, onClose }: JobAssistanceModal
               {loading ? "Sending..." : "Submit request"}
             </button>
           </form>
-        )}
       </div>
     </div>
   );

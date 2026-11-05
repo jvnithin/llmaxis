@@ -31,7 +31,12 @@ export async function POST(req: NextRequest) {
     const countryName = String(body.country || "");
     const phone = String(body.phone || "");
     const program = String(body.program || "");
-    const article = String(body.article || "").trim().slice(0, 180);
+    const kindRaw = String(body.kind || "").trim().toLowerCase();
+    const kind = kindRaw === "roadmap" ? "roadmap" : "article";
+    const title = String(body.title || body.article || "")
+      .trim()
+      .slice(0, 180);
+    const slug = String(body.slug || "").trim().slice(0, 120);
 
     const fields: Record<string, string> = {};
     const nameError = validateName(name);
@@ -57,6 +62,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const source =
+      kind === "roadmap" ? "guide_roadmap_counselling" : "guide_article_counselling";
+
     const saved = await appendInquiryRow(
       {
         name: name.trim().replace(/\s+/g, " "),
@@ -65,8 +73,12 @@ export async function POST(req: NextRequest) {
         country: country!.name,
         countryCode: country!.dial,
         phone: `'${country!.dial} ${phone.trim()}`,
-        article,
-        source: "guide_counselling",
+        kind,
+        title,
+        slug,
+        // Legacy column / older script deployments
+        article: title,
+        source,
       },
       { spreadsheetId: null, webhookUrl },
     );

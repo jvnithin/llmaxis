@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Icon, { IconName } from "@/components/home/Icon";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -94,9 +95,25 @@ export default function ProgramsPage() {
   const modalOpenRef = useRef(false);
   const enrollModalOpenRef = useRef(false);
   const autoOpenedRef = useRef(false);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
 
   modalOpenRef.current = modalOpen;
   enrollModalOpenRef.current = enrollModalOpen;
+
+  // Navbar "Get Started" → /learning?brochure=1 opens the curriculum download modal.
+  useEffect(() => {
+    const brochure = searchParams.get("brochure");
+    if (brochure !== "1" && brochure?.toLowerCase() !== "true") return;
+
+    setEnrollModalOpen(false);
+    setModalOpen(true);
+    autoOpenedRef.current = true;
+
+    // Keep the programs page URL clean after opening.
+    router.replace(pathname || "/learning", { scroll: false });
+  }, [searchParams, router, pathname]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(

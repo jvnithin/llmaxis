@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { ToastProvider } from "@/components/ui/toast";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 
@@ -12,20 +13,18 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const pathname = usePathname();
 
   // /advertisment, /learning, and /programs have self-contained headers & footers
-  if (
+  const content =
     pathname?.startsWith("/advertisment") ||
     pathname?.startsWith("/learning") ||
-    pathname?.startsWith("/programs")
-  ) {
-    return <main>{children}</main>;
-  }
+    pathname?.startsWith("/programs") ? (
+      <main>{children}</main>
+    ) : (
+      <>
+        <Navbar />
+        {children}
+        <Footer />
+      </>
+    );
 
-  // Standard pages include the global Navbar and Footer
-  return (
-    <>
-      <Navbar />
-      {children}
-      <Footer />
-    </>
-  );
+  return <ToastProvider>{content}</ToastProvider>;
 }

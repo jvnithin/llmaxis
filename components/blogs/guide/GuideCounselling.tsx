@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { validateEmail, validateName } from "@/lib/communityForm";
 import { countries, getCountry, mobileLength, mobileLengthLabel, sanitizeNationalNumber, validateMobile } from "@/lib/countries";
+import { useToast } from "@/components/ui/toast";
 
 const PROGRAMS = [
   "Gen AI Foundation",
@@ -28,13 +29,26 @@ const emptyFields: Fields = {
   program: PROGRAMS[0],
 };
 
-export default function GuideCounselling({ articleTitle }: { articleTitle: string }) {
+export default function GuideCounselling({
+  contentTitle,
+  contentKind,
+  contentSlug,
+  /** @deprecated use contentTitle */
+  articleTitle,
+}: {
+  contentTitle?: string;
+  contentKind?: "article" | "roadmap";
+  contentSlug?: string;
+  articleTitle?: string;
+}) {
+  const toast = useToast();
   const [fields, setFields] = useState<Fields>(emptyFields);
   const [errors, setErrors] = useState<Partial<Record<keyof Fields, string>>>({});
   const [submitError, setSubmitError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [done, setDone] = useState(false);
   const selectedCountry = getCountry(fields.country);
+  const title = (contentTitle || articleTitle || "").trim();
+  const kind = contentKind === "roadmap" ? "roadmap" : "article";
 
   function update(next: Fields) {
     setFields(next);
@@ -73,17 +87,30 @@ export default function GuideCounselling({ articleTitle }: { articleTitle: strin
           program: fields.program,
           country: fields.country,
           phone: fields.phone,
-          article: articleTitle,
+          title,
+          kind,
+          slug: contentSlug || "",
+          // Keep legacy key for older Apps Script deployments.
+          article: title,
         }),
       });
       const body = (await response.json().catch(() => null)) as { error?: string } | null;
       if (!response.ok) {
-        setSubmitError(body?.error || "Something went wrong. Please try again.");
+        const message = body?.error || "Something went wrong. Please try again.";
+        setSubmitError(message);
+        toast.error("Could not send request", message);
         return;
       }
-      setDone(true);
+      toast.success(
+        "Request received",
+        "A counsellor will contact you on the details you shared.",
+      );
+      setFields(emptyFields);
+      setErrors({});
     } catch {
-      setSubmitError("Something went wrong. Please try again.");
+      const message = "Something went wrong. Please try again.";
+      setSubmitError(message);
+      toast.error("Could not send request", message);
     } finally {
       setLoading(false);
     }
@@ -93,10 +120,7 @@ export default function GuideCounselling({ articleTitle }: { articleTitle: strin
     <aside className="guide-aside" id="guide-counselling">
       <p className="guide-aside-kicker">Free counselling</p>
       <h2>Get free career counselling</h2>
-      {done ? (
-        <p className="guide-aside-success">Your request is in. A counsellor will contact you on the details you shared.</p>
-      ) : (
-        <form onSubmit={onSubmit} noValidate>
+      <form onSubmit={onSubmit} noValidate>
           <label>
             Full name
             <input
@@ -193,12 +217,11 @@ export default function GuideCounselling({ articleTitle }: { articleTitle: strin
             </span>
             {errors.phone ? <small>{errors.phone}</small> : null}
           </label>
-          {submitError ? <p className="guide-submit-error">{submitError}</p> : null}
-          <button type="submit" disabled={loading}>
-            {loading ? "Sending..." : "Request a callback"}
-          </button>
-        </form>
-      )}
+        {submitError ? <p className="guide-submit-error">{submitError}</p> : null}
+        <button type="submit" disabled={loading}>
+          {loading ? "Sending..." : "Request a callback"}
+        </button>
+      </form>
     </aside>
   );
 }

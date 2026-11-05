@@ -18,6 +18,7 @@ import {
   validatePartnershipInquiry,
   type PartnershipInquiry,
 } from "@/lib/partnershipForm";
+import { useToast } from "@/components/ui/toast";
 import "../business-enquiry/business-enquiry.css";
 import "./partnership.css";
 
@@ -26,6 +27,7 @@ type PartnershipModalProps = {
 };
 
 export default function PartnershipModal({ onClose }: PartnershipModalProps) {
+  const toast = useToast();
   const titleId = useId();
   const customRef = useRef<HTMLInputElement>(null);
   const onCloseRef = useRef(onClose);
@@ -34,7 +36,6 @@ export default function PartnershipModal({ onClose }: PartnershipModalProps) {
   const [details, setDetails] = useState<PartnershipInquiry>(emptyPartnershipInquiry);
   const [errors, setErrors] = useState<Partial<Record<keyof PartnershipInquiry, string>>>({});
   const [loading, setLoading] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState("");
   onCloseRef.current = onClose;
   detailsRef.current = details;
@@ -125,14 +126,19 @@ export default function PartnershipModal({ onClose }: PartnershipModalProps) {
         content_name: details.partnership || "Partnership",
         source: "partnership_inquiry",
       });
-      setSubmitted(true);
+      toast.success(
+        "Inquiry received",
+        "Our team will review your inquiry and get in touch.",
+      );
+      setDetails(emptyPartnershipInquiry);
+      onClose();
     } catch (error) {
       const message = error instanceof Error ? error.message : "";
-      setSubmitError(
-        message && message !== "Request failed"
-          ? message
-          : "Something went wrong while sending. Please try again.",
-      );
+      const fallback = "Something went wrong while sending. Please try again.";
+      const finalMessage =
+        message && message !== "Request failed" ? message : fallback;
+      setSubmitError(finalMessage);
+      toast.error("Could not send inquiry", finalMessage);
     } finally {
       setLoading(false);
     }
@@ -151,12 +157,8 @@ export default function PartnershipModal({ onClose }: PartnershipModalProps) {
         <header className="enquiry-header">
           <div>
             <p className="enquiry-kicker">Partnerships</p>
-            <h3 id={titleId}>{submitted ? "Inquiry received" : "Partner with us"}</h3>
-            <p>
-              {submitted
-                ? "Our team will review your inquiry and get in touch."
-                : "Tell us about your organization and how you would like to work together."}
-            </p>
+            <h3 id={titleId}>Partner with us</h3>
+            <p>Tell us about your organization and how you would like to work together.</p>
           </div>
           <button
             type="button"
@@ -171,15 +173,7 @@ export default function PartnershipModal({ onClose }: PartnershipModalProps) {
           </button>
         </header>
 
-        {submitted ? (
-          <div className="enquiry-success">
-            <p>Our team will review your inquiry and get in touch.</p>
-            <button type="button" className="enquiry-primary" onClick={onClose}>
-              Done
-            </button>
-          </div>
-        ) : (
-          <form className="enquiry-form" onSubmit={handleSubmit} noValidate>
+        <form className="enquiry-form" onSubmit={handleSubmit} noValidate>
             <section className="partnership-section">
               <h4>Your Details</h4>
               <div className="enquiry-fields">
@@ -353,7 +347,6 @@ export default function PartnershipModal({ onClose }: PartnershipModalProps) {
             </button>
             <p className="partnership-note">Our team will review your inquiry and get in touch.</p>
           </form>
-        )}
       </div>
     </div>
   );

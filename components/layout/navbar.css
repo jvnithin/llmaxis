@@ -215,6 +215,10 @@
   gap: 12px;
 }
 
+.resources-grid .resource-card:nth-child(3) {
+  grid-column: 1 / -1;
+}
+
 .resource-card {
   display: flex;
   width: 100%;
@@ -262,7 +266,8 @@
   color: #3b6cff;
 }
 
-.resource-icon-prompt {
+.resource-icon-prompt,
+.resource-icon-prompts {
   color: #7a5af8;
 }
 

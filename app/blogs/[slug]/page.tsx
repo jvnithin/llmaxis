@@ -35,7 +35,14 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
       description={guide.metaDescription}
       toc={guide.toc}
       body={<GuideBody key="guide-body" blocks={guide.blocks} />}
-      aside={<GuideCounselling key="guide-aside" articleTitle={guide.title} />}
+      aside={
+        <GuideCounselling
+          key="guide-aside"
+          contentTitle={guide.title}
+          contentKind={guide.kind}
+          contentSlug={guide.slug}
+        />
+      }
     />
   );
 }

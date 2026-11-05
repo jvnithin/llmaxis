@@ -16,6 +16,7 @@ import {
   EnquiryField,
   getBusinessService,
 } from "./config";
+import { useToast } from "@/components/ui/toast";
 import "./business-enquiry.css";
 
 type PrimaryDetails = {
@@ -105,6 +106,7 @@ export default function BusinessEnquiryModal({
   serviceTitle,
   onClose,
 }: BusinessEnquiryModalProps) {
+  const toast = useToast();
   const service = serviceTitle ? getBusinessService(serviceTitle) : null;
   const titleId = useId();
   const [mounted, setMounted] = useState(false);
@@ -113,7 +115,6 @@ export default function BusinessEnquiryModal({
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const primaryRef = useRef(primary);
   primaryRef.current = primary;
@@ -127,7 +128,6 @@ export default function BusinessEnquiryModal({
     setPrimary(emptyPrimary);
     setAnswers({});
     setErrors({});
-    setSubmitted(false);
     setSubmitError("");
     setLoading(false);
   }, [serviceTitle]);
@@ -266,14 +266,21 @@ export default function BusinessEnquiryModal({
         content_name: service.title,
         source: "business_service_enquiry",
       });
-      setSubmitted(true);
+      toast.success(
+        "Enquiry received",
+        `Thank you, ${primary.fullName.trim()}. We have your ${service.title.toLowerCase()} enquiry for ${primary.company.trim()}.`,
+      );
+      setPrimary(emptyPrimary);
+      setAnswers({});
+      setStep(1);
+      onClose();
     } catch (error) {
       const message = error instanceof Error ? error.message : "";
-      setSubmitError(
-        message && message !== "Request failed"
-          ? message
-          : "Something went wrong while sending. Please try again.",
-      );
+      const fallback = "Something went wrong while sending. Please try again.";
+      const finalMessage =
+        message && message !== "Request failed" ? message : fallback;
+      setSubmitError(finalMessage);
+      toast.error("Could not send enquiry", finalMessage);
     } finally {
       setLoading(false);
     }
@@ -311,14 +318,12 @@ export default function BusinessEnquiryModal({
           <div>
             <p className="enquiry-kicker">Business enquiry</p>
             <h3 id={titleId}>
-              {submitted ? "Enquiry received" : step === 1 ? "Tell us about you" : service.enquiryLabel}
+              {step === 1 ? "Tell us about you" : service.enquiryLabel}
             </h3>
             <p>
-              {submitted
-                ? "Our team will review your details and get back to you."
-                : step === 1
-                  ? "This first step is the same for every business service."
-                  : service.objective}
+              {step === 1
+                ? "This first step is the same for every business service."
+                : service.objective}
             </p>
           </div>
           <button type="button" className="enquiry-close" onClick={onClose} aria-label="Close form" disabled={loading}>
@@ -328,19 +333,7 @@ export default function BusinessEnquiryModal({
           </button>
         </header>
 
-        {submitted ? (
-          <div className="enquiry-success">
-            <span className="enquiry-success-mark" aria-hidden="true">✓</span>
-            <p>
-              Thank you, {primary.fullName.trim()}. We have your {service.title.toLowerCase()} enquiry
-              for {primary.company.trim()}.
-            </p>
-            <button type="button" className="enquiry-primary" onClick={onClose}>
-              Done
-            </button>
-          </div>
-        ) : (
-          <form className="enquiry-form" onSubmit={handleSubmit} noValidate>
+        <form className="enquiry-form" onSubmit={handleSubmit} noValidate>
             <div className="enquiry-progress" aria-hidden="true">
               <span className={step === 1 ? "is-active" : "is-done"}>1. Your details</span>
               <span className={step === 2 ? "is-active" : ""}>2. {service.enquiryLabel}</span>
@@ -483,7 +476,6 @@ export default function BusinessEnquiryModal({
               </button>
             </div>
           </form>
-        )}
       </div>
     </div>
   );

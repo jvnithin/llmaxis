@@ -517,6 +517,12 @@
   line-height: 1.05;
 }
 
+.intro .section-heading h2 {
+  font-size: clamp(2.15rem, 4vw, 3.45rem);
+  letter-spacing: -0.04em;
+  line-height: 1.08;
+}
+
 .section-heading > p,
 .stories-top > p {
   margin-bottom: 4px;
@@ -1423,6 +1429,10 @@ button.service-card {
   .stories h2,
   .contact h2 {
     font-size: 2.6rem;
+  }
+
+  .intro .section-heading h2 {
+    font-size: 2.15rem;
   }
   .benefit {
     gap: 13px;

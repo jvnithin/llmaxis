@@ -1,9 +1,16 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { X, CheckCircle2, MessageCircle, Lock, ShieldCheck, AlertCircle } from "lucide-react";
+import { X, CheckCircle2, Lock, ShieldCheck, AlertCircle } from "lucide-react";
 import { event as trackFbEvent } from "@/lib/fpixel";
-import { countries, getCountry } from "@/lib/countries";
+import {
+  countries,
+  getCountry,
+  mobileLength,
+  mobileLengthLabel,
+  sanitizeNationalNumber,
+  validateMobile,
+} from "@/lib/countries";
 import { quoteEventPrice } from "@/lib/eventPrice";
 import { detectCountryClient } from "@/lib/clientGeo";
 
@@ -245,6 +252,7 @@ export default function EventRegisterModal({
           ...prev,
           country: detectedCountry.name,
           dialCode: detectedCountry.dial,
+          phone: sanitizeNationalNumber(prev.phone, detectedCountry),
         }));
       }
 
@@ -271,26 +279,54 @@ export default function EventRegisterModal({
     };
   }, [isOpen, eventName, fetchPricing, geoApplied]);
 
+  const selectedCountry = getCountry(form.country);
+  const phoneMaxLength = selectedCountry ? mobileLength(selectedCountry)[1] : 15;
+
   const handleCountryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selected = countries.find((c) => c.name === e.target.value);
+    const selected = getCountry(e.target.value);
     setForm((prev) => ({
       ...prev,
       country: e.target.value,
       dialCode: selected?.dial ?? "+91",
+      phone: selected ? sanitizeNationalNumber(prev.phone, selected) : "",
     }));
+    if (error) setError("");
     void fetchPricing(e.target.value, selected?.code);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+    if (name === "phone") {
+      const country = getCountry(form.country);
+      if (!country) {
+        setError("Select your country first.");
+        return;
+      }
+      setForm((prev) => ({
+        ...prev,
+        phone: sanitizeNationalNumber(value, country),
+      }));
+    } else {
+      setForm((prev) => ({ ...prev, [name]: value }));
+    }
     if (error) setError("");
   };
 
   const handlePayNow = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!form.name.trim() || !form.email.trim() || !form.phone.trim()) {
+    if (!form.name.trim() || !form.email.trim()) {
       setError("Please fill in all required fields.");
+      return;
+    }
+
+    const phoneError = validateMobile(form.country, form.phone);
+    if (phoneError) {
+      setError(
+        phoneError === "Enter your phone or WhatsApp number."
+          ? "Enter your mobile number."
+          : phoneError,
+      );
       return;
     }
 
@@ -571,19 +607,7 @@ export default function EventRegisterModal({
               )}
             </div>
 
-            <div className="pt-3 space-y-2">
-              <a
-                href={`https://wa.me/918309782214?text=${encodeURIComponent(
-                  `Hi LLM Axis, I have completed the payment for ${eventName}.`
-                )}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl text-sm font-semibold transition shadow-xs"
-              >
-                <MessageCircle className="w-4 h-4" />
-                <span>Join WhatsApp Updates Group</span>
-              </a>
-
+            <div className="pt-3">
               <button
                 type="button"
                 onClick={handleClose}
@@ -673,13 +697,23 @@ export default function EventRegisterModal({
                   <input
                     name="phone"
                     type="tel"
+                    inputMode="numeric"
                     required
                     value={form.phone}
                     onChange={handleChange}
-                    placeholder="Enter mobile number"
+                    placeholder={
+                      selectedCountry
+                        ? mobileLengthLabel(selectedCountry)
+                        : "Enter mobile number"
+                    }
+                    maxLength={phoneMaxLength}
+                    autoComplete="tel-national"
                     className="flex-1 border border-slate-200 bg-slate-50/70 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white transition"
                   />
                 </div>
+                <p className="mt-1.5 text-[11px] text-slate-400">
+                  Digits only — country code is added automatically.
+                </p>
               </div>
 
               {/* Error Alert */}

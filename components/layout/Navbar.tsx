@@ -96,7 +96,7 @@ export default function Navbar() {
             Our Programs
           </Link>
           {SHOW_RESOURCES_NAV ? <div
-            className={`nav-dropdown${resourcesOpen ? " is-open" : ""}${pathname.startsWith("/blogs") ? " is-current" : ""}`}
+            className={`nav-dropdown${resourcesOpen ? " is-open" : ""}${pathname.startsWith("/blogs") || pathname.startsWith("/prompts") ? " is-current" : ""}`}
             ref={resourcesRef}
             onMouseEnter={() => {
               if (canHoverResources()) openResources();
@@ -189,10 +189,33 @@ export default function Navbar() {
                     </span>
                     Articles
                   </Link>
+                  <Link
+                    href="/prompts"
+                    className="resource-card"
+                    onClick={() => {
+                      setResourcesOpen(false);
+                      setOpen(false);
+                    }}
+                  >
+                    <span className="resource-icon resource-icon-prompts" aria-hidden="true">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z" />
+                        <path d="M8 9h8M8 13h5" />
+                      </svg>
+                    </span>
+                    Free Prompts Library
+                  </Link>
                 </div>
               </div>
             </div>
           </div> : null}
+          <Link
+            href="/careers"
+            className={pathname === "/careers" || pathname.startsWith("/careers/") ? "active" : ""}
+            onClick={() => setOpen(false)}
+          >
+            Careers
+          </Link>
           <Link
             href="/hire"
             className={pathname === "/hire" ? "active" : ""}
@@ -210,7 +233,7 @@ export default function Navbar() {
 
           {/* Mobile-only CTA in dropdown */}
           <Link
-            href={isLearning ? "#enroll" : "/learning"}
+            href="/learning?brochure=1"
             className="nav-mobile-cta"
             style={{ display: "none" }}
             onClick={() => setOpen(false)}
@@ -222,7 +245,7 @@ export default function Navbar() {
         {/* Desktop CTA Button (Get Started with arrow icon) */}
         <Link
           className="button-nav"
-          href={isLearning ? "#enroll" : "/learning"}
+          href="/learning?brochure=1"
           onClick={() => setOpen(false)}
         >
           Get Started

@@ -191,19 +191,26 @@ export function getArticleCategories() {
     .map(([category]) => category);
 }
 
-export function getGuide(slug: string): GuideDocument | null {
+export type GuidePageDocument = GuideDocument & {
+  kind: ContentKind;
+  slug: string;
+};
+
+export function getGuide(slug: string): GuidePageDocument | null {
   const article = contentFiles().find((entry) => entry.slug === slug);
   if (!article) return null;
 
   if (article.kind === "article") {
     const folders = assignByHint(articleOnly(), articleImageFolders(), ARTICLE_FOLDER_HINTS);
     const imageDir = folders.get(article.slug) ?? "";
-    return parseGuideMarkdown(article.source, imageDir ? articleBodyImages(imageDir) : []);
+    const doc = parseGuideMarkdown(article.source, imageDir ? articleBodyImages(imageDir) : []);
+    return { ...doc, kind: "article", slug: article.slug };
   }
 
   const folders = assignByHint(roadmapOnly(), thumbnailFolders(), FOLDER_HINTS);
   const imageDir = folders.get(article.slug) ?? "";
-  return parseGuideMarkdown(article.source, imageDir ? guideImages(imageDir) : []);
+  const doc = parseGuideMarkdown(article.source, imageDir ? guideImages(imageDir) : []);
+  return { ...doc, kind: "roadmap", slug: article.slug };
 }
 
 export function getBlogGuides(): BlogGuide[] {
