@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Icon, { IconName } from "@/components/home/Icon";
@@ -88,6 +88,14 @@ function getScrollProgress() {
 }
 
 export default function ProgramsPage() {
+  return (
+    <Suspense fallback={<div className="app" aria-busy="true" />}>
+      <ProgramsPageContent />
+    </Suspense>
+  );
+}
+
+function ProgramsPageContent() {
   const [modalOpen, setModalOpen] = useState(false);
   const [enrollModalOpen, setEnrollModalOpen] = useState(false);
   const appRef = useRef<HTMLDivElement>(null);
