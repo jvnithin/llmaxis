@@ -1,7 +1,9 @@
 import "./globals.css";
 import AppLayout from "@/components/layout/AppLayout";
 import MetaPixel from "@/components/analytics/MetaPixel";
-import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
+import GoogleAnalytics, {
+  GoogleTagScripts,
+} from "@/components/analytics/GoogleAnalytics";
 import { Plus_Jakarta_Sans } from "next/font/google";
 
 const font = Plus_Jakarta_Sans({
@@ -96,6 +98,8 @@ export default function RootLayout({
   return (
     <html lang="en" className={font.className}>
       <head>
+        {/* Google tag (gtag.js) — immediately after <head>, one tag only */}
+        <GoogleTagScripts />
         <link rel="icon" href="/favicon.ico" type="image/x-icon" sizes="any" />
         <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
         <link rel="apple-touch-icon" href="/favicon.ico" />

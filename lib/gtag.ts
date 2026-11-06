@@ -1,6 +1,8 @@
+/** Primary Google tag ID (gtag.js). Prefer the Google tag / GTM container ID. */
 export const GA_MEASUREMENT_ID = (
+  process.env.NEXT_PUBLIC_GOOGLE_TAG_ID ||
   process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ||
-  "G-FH9ZE2R45Z"
+  "GTM-M3N8RFRG"
 ).trim();
 
 export type GtagEventParams = Record<
@@ -20,7 +22,7 @@ declare global {
 }
 
 /**
- * Log pageviews to Google Analytics
+ * Log pageviews to Google Analytics / Google tag
  */
 export const pageview = (url: string): void => {
   if (typeof window === "undefined" || !GA_MEASUREMENT_ID) return;
