@@ -33,7 +33,7 @@
 
 .external-link-header h3 {
   margin: 0;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-space), "Space Grotesk", sans-serif;
   font-size: 24px;
   letter-spacing: -0.04em;
 }

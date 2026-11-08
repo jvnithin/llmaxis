@@ -1,16 +1,30 @@
 "use client";
 
 import { Suspense, useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Icon, { IconName } from "@/components/home/Icon";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import BrochureModal from "@/components/learning/BroucherModal";
-import { ProjectsRoadmapSection } from "@/components/learning/projects-roadmap";
-import EventRegisterModal from "@/components/events/EventRegisterModal";
-import LearnerStoriesSection from "@/components/learning/LearnerStoriesSection";
 import "@/components/learning/programs.css";
+
+const BrochureModal = dynamic(() => import("@/components/learning/BroucherModal"), {
+  ssr: false,
+});
+const EventRegisterModal = dynamic(
+  () => import("@/components/events/EventRegisterModal"),
+  { ssr: false },
+);
+const ProjectsRoadmapSection = dynamic(
+  () =>
+    import("@/components/learning/projects-roadmap").then(
+      (mod) => mod.ProjectsRoadmapSection,
+    ),
+);
+const LearnerStoriesSection = dynamic(
+  () => import("@/components/learning/LearnerStoriesSection"),
+);
 
 const audiences = [
   {

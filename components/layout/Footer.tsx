@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { MouseEvent } from "react";
+import { CookieSettingsButton } from "@/components/cookies";
 import "./footer.css";
 
 const FALLBACK_WHATSAPP_URL = `https://wa.me/918309782214?text=${encodeURIComponent(
@@ -173,6 +174,7 @@ export default function Footer() {
               <Link href="/privacy-policy">Privacy Policy</Link>
               <Link href="/refund-policy">Refund Policy</Link>
               <Link href="/terms-and-conditions">Terms &amp; Condition</Link>
+              <CookieSettingsButton className="site-footer-cookie-settings" />
             </div>
           </div>
         </div>

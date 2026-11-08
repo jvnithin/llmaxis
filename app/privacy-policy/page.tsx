@@ -237,9 +237,13 @@ export default function PrivacyPolicyPage() {
             Users may manage or disable cookies through their browser settings. Some website
             functionalities may not operate correctly if certain cookies are disabled.
           </p>
-          <p>
+          <p className="mb-3">
             Where legally required, consent will be obtained before using non-essential cookies
             or tracking technologies.
+          </p>
+          <p>
+            You can review or update your cookie preferences anytime using{" "}
+            <strong>Cookie Settings</strong> in the website footer.
           </p>
         </section>
 

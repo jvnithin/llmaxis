@@ -72,6 +72,7 @@ export default function Navbar() {
             width={130}
             height={47}
             priority
+            sizes="130px"
             className="brand-logo"
           />
         </Link>

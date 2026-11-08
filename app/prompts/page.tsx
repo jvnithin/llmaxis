@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
+import dynamic from "next/dynamic";
 import {
   PromptsCategories,
-  PromptsCta,
   PromptsHero,
   PromptsOutcomes,
-  PromptsPopular,
   PromptsSteps,
 } from "@/components/prompts";
 import "@/components/prompts/prompts.css";
+
+const PromptsPopular = dynamic(() => import("@/components/prompts/PromptsPopular"));
+const PromptsCta = dynamic(() => import("@/components/prompts/PromptsCta"));
 
 export const metadata: Metadata = {
   title: "Free AI Prompt Library | Chat Prompts",

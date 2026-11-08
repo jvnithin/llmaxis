@@ -1,8 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
 
 :root {
   color-scheme: light;
-  font-family: 'Manrope', sans-serif;
+  font-family: var(--font-manrope), 'Manrope', sans-serif;
   color: #17182b;
   background: #ffffff;
   font-synthesis: none;
@@ -26,7 +25,7 @@
   position: relative;
   min-height: 100vh;
   overflow-x: hidden;
-  font-family: 'Manrope', sans-serif;
+  font-family: var(--font-manrope), 'Manrope', sans-serif;
   color: #17182b;
   background:
     radial-gradient(circle at 10% 18%, rgba(68, 187, 255, 0.09), transparent 24rem),
@@ -54,7 +53,7 @@
 .programs-page h1,
 .programs-page h2,
 .programs-page h3 {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--font-space), 'Space Grotesk', sans-serif;
 }
 
 .programs-page button,
@@ -146,7 +145,7 @@
 .brand-copy {
   display: flex;
   color: #17182b;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--font-space), 'Space Grotesk', sans-serif;
   font-size: 14px;
   font-weight: 500;
   letter-spacing: 0.12em;
@@ -411,7 +410,7 @@
 .program-metrics strong {
   display: block;
   color: #262a40;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--font-space), 'Space Grotesk', sans-serif;
   font-size: 22px;
 }
 
@@ -493,7 +492,7 @@
 
 .audience-card-top > span {
   color: #7c3aed;
-  font-family: "Plus Jakarta Sans", "Space Grotesk", sans-serif;
+  font-family: var(--font-jakarta), var(--font-space), sans-serif;
   font-size: 14px;
   font-weight: 700;
   line-height: 20px;
@@ -744,7 +743,7 @@
 }
 
 .trainer-card-title {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--font-space), 'Space Grotesk', sans-serif;
   font-size: 32px;
   font-weight: 700;
   letter-spacing: -0.03em;
@@ -847,7 +846,7 @@
 }
 
 .trainer-role-title {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--font-space), 'Space Grotesk', sans-serif;
   font-size: 15px;
   font-weight: 700;
   color: #1e293b;
@@ -955,7 +954,7 @@
 }
 
 .trainer-name {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--font-space), 'Space Grotesk', sans-serif;
   font-size: 23px;
   font-weight: 700;
   color: #1e1b4b;
@@ -1051,7 +1050,7 @@
 }
 
 .trainer-clients-heading {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--font-space), 'Space Grotesk', sans-serif;
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -1505,7 +1504,7 @@
   margin: 120px 0 24px;
   padding-top: 8px;
   color: #d8dbea;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--font-space), 'Space Grotesk', sans-serif;
   font-size: 19px;
   font-weight: 600;
 }

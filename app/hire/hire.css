@@ -1,11 +1,10 @@
-@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap");
 
 .hire-page {
   position: relative;
   min-height: 100vh;
   overflow: hidden;
   padding: 132px 0 88px;
-  font-family: "Manrope", sans-serif;
+  font-family: var(--font-manrope), "Manrope", sans-serif;
   color: #17182b;
   background:
     radial-gradient(circle at 12% 18%, rgba(68, 187, 255, 0.1), transparent 24rem),
@@ -21,7 +20,7 @@
 
 .hire-page h1,
 .hire-page h2 {
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-space), "Space Grotesk", sans-serif;
 }
 
 .hire-page button,

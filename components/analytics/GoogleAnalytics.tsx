@@ -4,30 +4,28 @@ import { GA_MEASUREMENT_ID } from "@/lib/gtag";
 import GoogleAnalyticsRouteTracker from "./GoogleAnalyticsRouteTracker";
 
 /**
- * Google tag (gtag.js) scripts for `<head>`.
- * Install once, immediately after the opening `<head>` tag.
+ * Google tag (gtag.js) — deferred so it does not block first paint (FCP/LCP).
  */
 export function GoogleTagScripts() {
   if (!GA_MEASUREMENT_ID) return null;
 
   return (
     <>
-      {/* Google tag (gtag.js) */}
       <Script
         id="google-tag-js"
-        strategy="beforeInteractive"
+        strategy="afterInteractive"
         src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
       />
       <Script
         id="google-tag"
-        strategy="beforeInteractive"
+        strategy="afterInteractive"
         dangerouslySetInnerHTML={{
           __html: `
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             window.gtag = gtag;
             gtag('js', new Date());
-            gtag('config', '${GA_MEASUREMENT_ID}');
+            gtag('config', '${GA_MEASUREMENT_ID}', { send_page_view: true });
           `,
         }}
       />

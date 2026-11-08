@@ -14,7 +14,7 @@
   border-top: 1px solid rgba(243, 232, 255, 0.7);
   border-bottom: 1px solid rgba(243, 232, 255, 0.7);
   background: linear-gradient(180deg, #faf9fe 0%, #ffffff 50%, #faf9fe 100%);
-  font-family: "Plus Jakarta Sans", "Manrope", sans-serif;
+  font-family: var(--font-jakarta), var(--font-manrope), sans-serif;
   color: var(--pr-ink);
 }
 
@@ -683,7 +683,7 @@
   padding: 20px;
   background: rgba(18, 18, 32, 0.52);
   backdrop-filter: blur(6px);
-  font-family: "Manrope", "Plus Jakarta Sans", sans-serif;
+  font-family: var(--font-manrope), var(--font-jakarta), sans-serif;
   animation: pr-modal-fade-in 180ms ease;
 }
 
@@ -799,7 +799,7 @@
 .pr-modal-title {
   margin: 0;
   color: var(--pr-ink);
-  font-family: "Space Grotesk", "Manrope", sans-serif;
+  font-family: var(--font-space), var(--font-manrope), sans-serif;
   font-size: 26px;
   font-weight: 700;
   letter-spacing: -0.04em;

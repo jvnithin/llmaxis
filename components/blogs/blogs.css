@@ -67,7 +67,7 @@
   border-radius: 999px;
   background: #f2f3ff;
   color: #630ed4;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-space), "Space Grotesk", sans-serif;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 1.1px;
@@ -193,7 +193,7 @@
   align-items: center;
   gap: 8px;
   color: #131b2e;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-space), "Space Grotesk", sans-serif;
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.48px;
@@ -349,7 +349,7 @@
   border-radius: 12px;
   background: transparent;
   color: #4a4455;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-space), "Space Grotesk", sans-serif;
   font-size: 15px;
   font-weight: 700;
   letter-spacing: 0.15px;
@@ -440,7 +440,7 @@
   border-radius: 999px;
   background: #f2f3ff;
   color: #4a4455;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-space), "Space Grotesk", sans-serif;
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.3px;
@@ -506,7 +506,7 @@ a.blog-card:hover {
 .blog-card-category {
   margin: 0;
   color: #630ed4;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-space), "Space Grotesk", sans-serif;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.4px;
@@ -536,7 +536,7 @@ a.blog-card:hover {
   padding: 4px 12px;
   border-radius: 999px;
   background: rgba(250, 248, 255, 0.9);
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-space), "Space Grotesk", sans-serif;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.48px;
@@ -566,7 +566,7 @@ a.blog-card:hover {
 .blog-kicker {
   margin: 0;
   color: #4a4455;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-space), "Space Grotesk", sans-serif;
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.6px;
@@ -644,7 +644,7 @@ a.blog-card:hover {
   border-radius: 999px;
   background: #faf8ff;
   color: #4648d4;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-space), "Space Grotesk", sans-serif;
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.48px;
@@ -741,7 +741,7 @@ a.blog-card:hover {
   gap: 8px;
   margin: 0;
   color: #4a4455;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-space), "Space Grotesk", sans-serif;
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.48px;
@@ -838,7 +838,7 @@ a.blog-card:hover {
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.15);
   color: #fff;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-space), "Space Grotesk", sans-serif;
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 1.2px;

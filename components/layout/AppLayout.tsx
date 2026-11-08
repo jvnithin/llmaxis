@@ -2,6 +2,11 @@
 
 import { usePathname } from "next/navigation";
 import { ToastProvider } from "@/components/ui/toast";
+import {
+  ConsentGatedAnalytics,
+  CookieBanner,
+  CookieConsentProvider,
+} from "@/components/cookies";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 
@@ -26,5 +31,11 @@ export default function AppLayout({ children }: AppLayoutProps) {
       </>
     );
 
-  return <ToastProvider>{content}</ToastProvider>;
+  return (
+    <CookieConsentProvider>
+      <ConsentGatedAnalytics />
+      <ToastProvider>{content}</ToastProvider>
+      <CookieBanner />
+    </CookieConsentProvider>
+  );
 }

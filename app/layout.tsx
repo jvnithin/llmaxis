@@ -1,15 +1,34 @@
 import "./globals.css";
 import AppLayout from "@/components/layout/AppLayout";
-import MetaPixel from "@/components/analytics/MetaPixel";
-import GoogleAnalytics, {
-  GoogleTagScripts,
-} from "@/components/analytics/GoogleAnalytics";
-import { Plus_Jakarta_Sans } from "next/font/google";
+import { JetBrains_Mono, Manrope, Plus_Jakarta_Sans, Space_Grotesk } from "next/font/google";
 
-const font = Plus_Jakarta_Sans({
+const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800"],
   display: "swap",
+  variable: "--font-jakarta",
+});
+
+const manrope = Manrope({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
+  variable: "--font-manrope",
+});
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  display: "swap",
+  variable: "--font-space",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["500", "700"],
+  display: "swap",
+  variable: "--font-mono",
+  preload: false,
 });
 
 export const metadata = {
@@ -33,7 +52,6 @@ export const metadata = {
     "AI development company India",
   ],
 
-  // ✅ Canonical
   alternates: {
     canonical: "https://llmaxis.in",
   },
@@ -62,7 +80,6 @@ export const metadata = {
     images: ["/og-image.png"],
   },
 
-  // ✅ Robots control
   robots: {
     index: true,
     follow: true,
@@ -75,7 +92,6 @@ export const metadata = {
     },
   },
 
-  // ✅ Icons - Uses public/favicon.ico
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
@@ -90,23 +106,23 @@ export const metadata = {
   },
 };
 
+const fontVars = `${jakarta.variable} ${manrope.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable}`;
+
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={font.className}>
+    <html lang="en" className={fontVars}>
       <head>
-        {/* Google tag (gtag.js) — immediately after <head>, one tag only */}
-        <GoogleTagScripts />
         <link rel="icon" href="/favicon.ico" type="image/x-icon" sizes="any" />
         <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
         <link rel="apple-touch-icon" href="/favicon.ico" />
       </head>
-      <body className={`${font.className} antialiased text-[#0F172A] bg-white`}>
-        <GoogleAnalytics />
-        <MetaPixel />
+      <body
+        className={`${jakarta.className} antialiased text-[#0F172A] bg-white`}
+      >
         <AppLayout>{children}</AppLayout>
       </body>
     </html>

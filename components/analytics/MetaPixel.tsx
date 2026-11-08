@@ -10,7 +10,7 @@ export default function MetaPixel() {
     <>
       <Script
         id="meta-pixel"
-        strategy="afterInteractive"
+        strategy="lazyOnload"
         dangerouslySetInnerHTML={{
           __html: `
             !function(f,b,e,v,n,t,s)
@@ -32,7 +32,7 @@ export default function MetaPixel() {
           width="1"
           style={{ display: "none" }}
           src={`https://www.facebook.com/tr?id=${FB_PIXEL_ID}&ev=PageView&noscript=1`}
-          alt="Meta Pixel"
+          alt=""
         />
       </noscript>
       <Suspense fallback={null}>

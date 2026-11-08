@@ -21,7 +21,7 @@
   background: #fff;
   box-shadow: 0 30px 80px rgba(28, 24, 62, 0.28);
   color: #17182b;
-  font-family: Manrope, sans-serif;
+  font-family: var(--font-manrope), Manrope, sans-serif;
 }
 
 .enquiry-header {
@@ -37,7 +37,7 @@
 
 .enquiry-header h3 {
   margin: 0;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-space), "Space Grotesk", sans-serif;
   font-size: 26px;
   letter-spacing: -0.04em;
 }

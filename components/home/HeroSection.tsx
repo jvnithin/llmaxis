@@ -1,8 +1,8 @@
 import React from "react";
 import Link from "next/link";
 import Icon from "./Icon";
-import NeuralCanvas from "./NeuralCanvas";
 import PartnerWithUsButton from "./partnership/PartnerWithUsButton";
+import NeuralCanvasLazy from "./NeuralCanvasLazy";
 
 export default function HeroSection() {
   return (
@@ -12,7 +12,7 @@ export default function HeroSection() {
       <div className="hero-orb orb-two" aria-hidden="true" />
       <div className="float-shape shape-one" aria-hidden="true" />
       <div className="float-shape shape-two" aria-hidden="true" />
-      <NeuralCanvas />
+      <NeuralCanvasLazy />
 
       <div className="section-container hero-content">
         <div className="hero-copy">
@@ -78,8 +78,7 @@ export default function HeroSection() {
       </div>
 
       <a className="scroll-cue" href="#programs">
-        <span>Scroll to explore</span>
-        <i />
+        Scroll
       </a>
     </section>
   );

@@ -1,11 +1,15 @@
+import dynamic from "next/dynamic";
 import "@/components/home/home.css";
 import HomeClientWrapper from "@/components/home/HomeClientWrapper";
 import HeroSection from "@/components/home/HeroSection";
 import ServicesSection from "@/components/home/ServicesSection";
 import WhySection from "@/components/home/WhySection";
-import ExperienceSection from "@/components/home/ExperienceSection";
-import StoriesSection from "@/components/home/StoriesSection";
-import ContactSection from "@/components/home/ContactSection";
+
+const ExperienceSection = dynamic(
+  () => import("@/components/home/ExperienceSection"),
+);
+const StoriesSection = dynamic(() => import("@/components/home/StoriesSection"));
+const ContactSection = dynamic(() => import("@/components/home/ContactSection"));
 
 export const metadata = {
   title: "AI Bootcamp | Learn AI with Real Projects | LLM Axis",
